@@ -11,13 +11,9 @@ class Parser
   end
 
   def call
-    terminal("(end)")
-    terminal("(name)")
-    infix(".")
+    setup
 
-    advance
-
-    # parse the tok
+    # parse the token
     expr = expression(0)
 
     if @node.id != "(end)"
@@ -32,6 +28,19 @@ class Parser
     end
 
     expr
+  end
+
+  def setup
+    terminal("(end)")
+    terminal("(name)")
+    terminal("(literal)")
+    infix(".") # map operator
+    infix("and") # Boolean AND
+    infix("or"); # Boolean OR
+    terminal("and") # the 'keywords' can also be used as terminals (field names)
+    terminal("or") 
+
+    advance
   end
 
   def advance(id = nil, infix = nil)
@@ -64,7 +73,7 @@ class Parser
         raise "S0204"
       end
     when "string", "number", "value"
-      #
+      sym = @symbol_table["(literal)"]
     when "regex"
       #
     else
@@ -82,7 +91,7 @@ class Parser
     left = nil
     t = @node
     advance(nil, true)
-    left = t.nud
+    left = t.respond_to?(:nud) ? t.nud : t
     while rbp < @node.lbp
       t = @node
       advance()
@@ -110,6 +119,9 @@ class Parser
         end
         result.seeking_parent = [lstep.slot] if lstep.type == "parent"
         rest = process_ast(expr.rhs)
+        if rest.type == "function"
+          raise "FUNCTION TODO"
+        end
         ## TODO
         # if rest.type == "function" &&
         #     rest.proedure.type == "path" &&
@@ -153,15 +165,68 @@ class Parser
         end
 
         resolve_ancestry(result)
+      when "["
+        raise "BINARY ["
+      when "{"
+        raise "BINARY {"
+      when "^"
+        raise "BINARY ^"
+      when ":="
+        raise "BINARY :="
+      when "@"
+        raise "BINARY @"
+      when "#"
+        raise "BINARY #"
+      when "~>"
+        raise "BINARY ~>"
+      else
+        result = JSymbol::Base.new(
+          context: self,
+          type: expr.type,
+          value: expr.value,
+          position: expr.position,
+          lhs: process_ast(expr.lhs),
+          rhs: process_ast(expr.rhs)
+        )
+        push_ancestry(result, result.lhs)
+        push_ancestry(result, result.rhs)
       end
+    when "unary"
+      raise "UNARY"
+    when "function", "partial"
+      raise "FUNCTION / PARTIAL"
+    when "lambda"
+      raise "LAMBDA"
+    when "condition"
+      raise "CONDITION"
+    when "transform"
+      raise "TRANSFORM"
+    when "block"
     when "name"
       result = JSymbol::Base.new(context: self, type: "path", steps: [expr])
       result.keep_singleton_array = expr.keep_array
+    when "parent"
     when "string", "number", "value", "wildcard", "descendant", "variable", "regex"
-      expr
+      result = expr
+    when "operator"
+      # the tokens 'and' and 'or' might have been used as a name rather than an operator
+      if %w(and or in).include?(expr.value)
+        expr.type = "name"
+        result = process_ast(expr)
+      elsif expr.value == "?"
+        raise "OPERATOR ?"
+      else
+        raise "S0201"
+      end
     end
 
     result
+  end
+
+  def push_ancestry(result, value)
+    if value.seeking_parent.present? || value.type == "parent"
+      raise "PUSH ANCESTRY"
+    end
   end
 
   def resolve_ancestry(path)

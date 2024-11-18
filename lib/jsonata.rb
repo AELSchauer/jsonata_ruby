@@ -7,7 +7,7 @@ class Jsonata
     @input = input
     @options = options
     @parser = Parser.new(expr)
-    @functions = Functions.new(context: @parser)
+    @fn = Functions.new(context: @parser)
   end
 
   def call
@@ -24,8 +24,14 @@ class Jsonata
     result = case expr.type
     when "path"
       evaluate_path(expr, input, environment)
+    when "binary"
+      evaluate_binary(expr, input, environment)
     when "name"
       evaluate_name(expr, input, environment)
+    when "value"
+      expr.value
+    else
+      "EVALUATE #{expr.type}"
     end
 
     if Utils.is_sequence?(result) && !result.tuple_stream
@@ -40,13 +46,42 @@ class Jsonata
     result 
   end
 
+  # Evaluate binary expression against input data
+  # @param {Object} expr - JSONata expression
+  # @param {Object} input - Input data to evaluate against
+  # @param {Object} environment - Environment
+  # @returns {*} Evaluated input data
+  def evaluate_binary(expr, input, environment)
+    lhs = evaluate(expr.lhs, input, environment)
+    rhs = evaluate(expr.rhs, input, environment)
+    op = expr.value
+
+    if op == "and" || op == "or"
+      return evaluate_boolean_expression(lhs, rhs, op)
+    end
+  end
+
+  # Evaluate boolean expression against input data
+  # @param {Object} lhs - LHS value
+  # @param {Function} evalrhs - function to evaluate RHS value
+  # @param {Object} op - opcode
+  # @returns {*} Result
+  def evaluate_boolean_expression(lhs, rhs, op)
+    case op
+    when "and"
+      @fn.boolean(lhs) && @fn.boolean(rhs)
+    when "or"
+      @fn.boolean(lhs) || @fn.boolean(rhs)
+    end
+  end
+
   # Evaluate name object against input data
   # @param {Object} expr - JSONata expression
   # @param {Object} input - Input data to evaluate against
   # @param {Object} environment - Environment
   # @returns {*} Evaluated input data
   def evaluate_name(expr, input, environment)
-    @functions.lookup(input, expr.value)
+    @fn.lookup(input, expr.value)
   end
 
   # Evaluate path expression against input data

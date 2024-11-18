@@ -3,6 +3,13 @@ class Functions
     @context = context
   end
 
+  # Evaluate an input and return a boolean
+  # @param {*} arg - Arguments
+  # @returns {boolean} Boolean
+  def boolean(arg)
+    Utils.is_numeric?(arg) ? !arg.zero? : arg.present?
+  end
+
   def lookup(input, key)
     result = nil
     if input.is_a?(Array)

@@ -6,7 +6,7 @@ class Utils
     # Check if value is a finite number
     # @param {float} n - number to evaluate
     # @returns {boolean} True if n is a finite number
-    def is_numeric(n)
+    def is_numeric?(n)
       is_num = false
       if n.is_a?(Numeric)
         is_num = !n.to_f.nan?

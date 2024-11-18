@@ -29,7 +29,7 @@ module JSymbol
       # map_vars = (instance_variables - [:@context, :@recover])
       map_vars = [:@lhs, :@position, :@rhs, :@steps, :@type, :@value]
       map_vars
-        .filter { |key| instance_variable_get(key).present? }
+        .reject { |key| instance_variable_get(key).nil? }
         .reduce({}) do |hsh, key|
           value = instance_variable_get(key)
           value = value.to_h if value.class.name.include?("JSymbol")

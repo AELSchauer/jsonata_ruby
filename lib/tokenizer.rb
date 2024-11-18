@@ -65,7 +65,7 @@ class Tokenizer
     current_char = @path[@position]
 
     # skip whitespace
-    while @position < @length && "\t\n\r\v".index(current_char).present?
+    while @position < @length && " \t\n\r\v".index(current_char).present?
       @position += 1
       current_char = @path[@position]
     end
