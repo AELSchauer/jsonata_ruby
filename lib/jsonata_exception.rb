@@ -1,9 +1,9 @@
 class JsonataException < StandardError
-  def initialize(code, value)
+  def initialize(code, option)
     super(
       {
         code: code,
-        value: value,
+        **option,
         stack: Thread.current.backtrace
       }.to_json
     )

@@ -11,7 +11,7 @@ class Utils
       if n.is_a?(Numeric)
         is_num = !n.to_f.nan?
         if is_num && !n.finite?
-          raise JsonataException.new("D1001", n.to_s)
+          raise JsonataException.new("D1001", {value: n.to_s})
         end
       end
       is_num
@@ -63,6 +63,18 @@ class Utils
       else
         false
       end
+    end
+
+    def is_function?(arg)
+      puts "IS_FUNCTION TO-DO"
+      false
+    end
+
+    # Tests if a value is a sequence
+    # @param {*} value the value to test
+    # @returns {boolean} true if it's a sequence
+    def is_sequence?(value)
+      value.class.to_s == "JSymbol::Sequence"
     end
 
     # converts a string to an array of characters
