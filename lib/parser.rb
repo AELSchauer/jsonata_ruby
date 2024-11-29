@@ -3,6 +3,8 @@ require "./lib/j_symbol"
 require "debug"
 
 class Parser
+  attr_reader :node
+
   def initialize(source)
     @source = source
     @lexer = Tokenizer.new(source)
@@ -31,14 +33,25 @@ class Parser
   end
 
   def setup
-    terminal("(end)")
-    terminal("(name)")
-    terminal("(literal)")
-    infix(".") # map operator
-    infix("and") # Boolean AND
-    infix("or"); # Boolean OR
-    terminal("and") # the 'keywords' can also be used as terminals (field names)
-    terminal("or") 
+    # Terminal
+    symbol("(end)")
+    symbol("(name)")
+    symbol("(literal)")
+    symbol("and") # the 'keywords' can also be used as terminals (field names)
+    symbol("or")
+
+    # Base Symbol
+    symbol(",")
+    symbol("]")
+
+    # Infix Only
+    symbol(".") # map operator
+    symbol("and") # Boolean AND
+    symbol("or") # Boolean OR
+
+    # Infix and Prefix
+    symbol("[") # array constructor & filter - predicate or array index
+    symbol("-") # numeric subtraction & unary numeric negation
 
     advance
   end
@@ -91,18 +104,13 @@ class Parser
     left = nil
     t = @node
     advance(nil, true)
-    left = t.respond_to?(:nud) ? t.nud : t
+    left = t.nud
     while rbp < @node.lbp
       t = @node
       advance()
       left = t.led(left)
     end
     left
-  end
-
-  def infix(id, bp = nil, led = nil)
-    binding_power = bp || Tokenizer::OPERATORS[id]
-    symbol(id: id, bp: binding_power, klass: JSymbol::Infix)
   end
 
   def process_ast(expr)
@@ -134,9 +142,9 @@ class Parser
         if rest.type == "path"
           result.steps.concat(rest.steps)
         else
-          if rest.predicate.present?
-            rest.stages = rest.predicate
-            rest.predicate = nil
+          if rest.predicates.present?
+            rest.stages = rest.predicates
+            rest.predicates = nil
           end
           result.steps.push(rest)
         end
@@ -161,12 +169,47 @@ class Parser
         # if the last step is an array constructor, flag it so it doesn't flatten
         last_step = result.steps.last
         if last_step.type == "unary" && last_step.value == "["
-          last_step.consarray.true
+          last_step.consarray = true
         end
 
         resolve_ancestry(result)
       when "["
-        raise "BINARY ["
+        # predicated step
+        # LHS is a step or a predicated step
+        # RHS is the predicate expr
+        result = process_ast(expr.lhs)
+        if result.type == "path"
+          step = result.steps.last
+          step.stages ||= []
+          arr = step.stages
+        else
+          step = result
+          step.predicates ||= []
+          arr = step.predicates
+        end
+        if step.group.present?
+          raise "S0209"
+        end
+        predicate = process_ast(expr.rhs)
+        if predicate.seeking_parent.present?
+          raise "BINARY [ SEEKING PARENT"
+          # predicate.seekingParent.forEach(slot => {
+          #     if(slot.level === 1) {
+          #         seekParent(step, slot);
+          #     } else {
+          #         slot.level--;
+          #     }
+          # });
+          # pushAncestry(step, predicate);
+        end
+        arr.push(
+          JSymbol::Base.new(
+            context: self,
+            type: "filter",
+            expression: predicate,
+            position: expr.position
+          )
+        )
       when "{"
         raise "BINARY {"
       when "^"
@@ -192,7 +235,30 @@ class Parser
         push_ancestry(result, result.rhs)
       end
     when "unary"
-      raise "UNARY"
+      result = JSymbol::Base.new(
+        context: self,
+        type: expr.type,
+        value: expr.value,
+        position: expr.position
+      )
+      if expr.value == "["
+        result.expressions = expr.expressions.map do |item|
+          value = process_ast(item)
+          push_ancestry(result, value)
+          value
+        end
+      elsif expr.value == "{"
+        raise "UNARY -- object constructor - process each pair"
+      else
+        result.expression = process_ast(expr.expression)
+        # if unary minus on a number, then pre-process
+        if expr.value == "-" && result.expression.type == "number"
+          result = result.expression
+          result.value = -result.value
+        else
+          push_ancestry(result, result.expression)
+        end
+      end
     when "function", "partial"
       raise "FUNCTION / PARTIAL"
     when "lambda"
@@ -296,10 +362,10 @@ class Parser
     slot
   end
 
-  def symbol(id:, klass: JSymbol::Base, bp: 0)
+  def symbol(id, bp = 0)
     sym = @symbol_table[id]
     if sym.blank?
-      sym = klass.new(context: self, lbp: bp, value: id)
+      sym = JSymbol::Base.new(context: self, lbp: bp, id: id, value: id)
       @symbol_table[id] = sym
     elsif bp >= sym.lbp
       sym.lbp = bp
@@ -312,6 +378,6 @@ class Parser
   end
 
   def terminal(id)
-    symbol(id: id, klass: JSymbol::Terminal, bp: 0)
+    symbol(id, 0)
   end
 end

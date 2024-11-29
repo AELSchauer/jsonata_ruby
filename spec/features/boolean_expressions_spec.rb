@@ -2,11 +2,10 @@ require "./lib/jsonata"
 require "json"
 
 # These are test cases copied over from the source JS repo
-describe "Boolean Expression Datasets" do
+describe "Boolean Expressions" do
   it "case000" do
     jsonata = build_jsonata(
-      expr: "true",
-      dataset: "dataset0"
+      expr: "true"
     )
 
     expect(jsonata.call).to eq(true)
@@ -14,8 +13,7 @@ describe "Boolean Expression Datasets" do
 
   it "case001" do
     jsonata = build_jsonata(
-      expr: "false",
-      dataset: "dataset0"
+      expr: "false"
     )
 
     expect(jsonata.call).to eq(false)
@@ -23,8 +21,7 @@ describe "Boolean Expression Datasets" do
 
   it "case002" do
     jsonata = build_jsonata(
-      expr: "false or false",
-      dataset: "dataset0"
+      expr: "false or false"
     )
 
     expect(jsonata.call).to eq(false)
@@ -32,8 +29,7 @@ describe "Boolean Expression Datasets" do
 
   it "case003" do
     jsonata = build_jsonata(
-      expr: "false or true",
-      dataset: "dataset0"
+      expr: "false or true"
     )
 
     expect(jsonata.call).to eq(true)
@@ -41,8 +37,7 @@ describe "Boolean Expression Datasets" do
 
   it "case004" do
     jsonata = build_jsonata(
-      expr: "true or false",
-      dataset: "dataset0"
+      expr: "true or false"
     )
 
     expect(jsonata.call).to eq(true)
@@ -50,8 +45,7 @@ describe "Boolean Expression Datasets" do
 
   it "case005" do
     jsonata = build_jsonata(
-      expr: "true or true",
-      dataset: "dataset0"
+      expr: "true or true"
     )
 
     expect(jsonata.call).to eq(true)
@@ -59,8 +53,7 @@ describe "Boolean Expression Datasets" do
 
   it "case006" do
     jsonata = build_jsonata(
-      expr: "false and false",
-      dataset: "dataset0"
+      expr: "false and false"
     )
 
     expect(jsonata.call).to eq(false)
@@ -68,8 +61,7 @@ describe "Boolean Expression Datasets" do
 
   it "case007" do
     jsonata = build_jsonata(
-      expr: "false and true",
-      dataset: "dataset0"
+      expr: "false and true"
     )
 
     expect(jsonata.call).to eq(false)
@@ -77,8 +69,7 @@ describe "Boolean Expression Datasets" do
 
   it "case008" do
     jsonata = build_jsonata(
-      expr: "true and false",
-      dataset: "dataset0"
+      expr: "true and false"
     )
 
     expect(jsonata.call).to eq(false)
@@ -86,8 +77,7 @@ describe "Boolean Expression Datasets" do
 
   it "case009" do
     jsonata = build_jsonata(
-      expr: "true and true",
-      dataset: "dataset0"
+      expr: "true and true"
     )
 
     expect(jsonata.call).to eq(true)
@@ -200,7 +190,11 @@ describe "Boolean Expression Datasets" do
   end
 
   # Helper setup functions
-  def build_jsonata(expr:, dataset:)
-    Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
+  def build_jsonata(expr:, dataset: nil)
+    if dataset.present?
+      Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
+    else
+      Jsonata.new(expr, "")
+    end
   end
 end

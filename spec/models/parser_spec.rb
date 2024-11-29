@@ -1,6 +1,279 @@
 require "./lib/parser"
 
 describe Parser do
+  describe "array constructors" do
+    describe "[]" do
+      it "returns the expected expression and processed steps" do
+        # Setup
+        parser = Parser.new("[]")
+        parser.setup
+
+        # Test
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => []
+        })
+
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => []
+        })
+      end
+    end
+
+    describe "[1]" do
+      it "returns the expected expression and processed steps" do
+        # Setup
+        parser = Parser.new("[1]")
+        parser.setup
+
+        # Test
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => [
+            { "value" => 1, "type" => "number", "position" => 2 }
+          ]
+        })
+
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => [
+            { "value" => 1, "type" => "number", "position" => 2 }
+          ]
+        })
+      end
+    end
+
+    describe "[1, \"two\",3]" do
+      it "returns the expected expression and processed steps" do
+        # Setup
+        parser = Parser.new("[1, \"two\",3]")
+        parser.setup
+
+        # Test
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => [
+            { "value" => 1, "type" => "number", "position" => 2 },
+            { "value" => "two", "type" => "string", "position" => 9 },
+            { "value" => 3, "type" => "number", "position" => 11 }
+          ]
+        })
+
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => [
+            { "value" => 1, "type" => "number", "position" => 2 },
+            { "value" => "two", "type" => "string", "position" => 9 },
+            { "value" => 3, "type" => "number", "position" => 11 }
+          ]
+        })
+      end
+    end
+
+    describe "[1, 2, [3, 4]]" do
+      it "returns the expected expression and processed steps" do
+        # Setup
+        parser = Parser.new("[1, 2, [3, 4]]")
+        parser.setup
+
+        # Test
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => [
+            { "value" => 1, "type" => "number", "position" => 2 },
+            { "value" => 2, "type" => "number", "position" => 5 },
+            { 
+              "type" => "unary", 
+              "value" => "[",
+              "position" => 8,
+              "expressions" => [
+                { "value" => 3, "type" => "number", "position" => 9 },
+                { "value" => 4, "type" => "number", "position" => 12 }
+              ]
+            }
+          ]
+        })
+
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => [
+            { "value" => 1, "type" => "number", "position" => 2 },
+            { "value" => 2, "type" => "number", "position" => 5 },
+            { 
+              "type" => "unary", 
+              "value" => "[",
+              "position" => 8,
+              "expressions" => [
+                { "value" => 3, "type" => "number", "position" => 9 },
+                { "value" => 4, "type" => "number", "position" => 12 }
+              ]
+            }
+          ]
+        })
+      end
+    end
+
+    describe "[foo.bar]" do
+      it "returns the expected expression and processed steps" do
+        # Setup
+        parser = Parser.new("[foo.bar]")
+        parser.setup
+
+        # Test
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => [
+            {
+              "type" => "binary",
+              "value" => ".",
+              "position" => 5,
+              "lhs" => { "value" => "foo", "type" => "name", "position" => 4 },
+              "rhs" =>{ "value" => "bar", "type" => "name", "position" => 8 }
+            }
+          ]
+        })
+
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "unary",
+          "value" => "[",
+          "position" => 1,
+          "expressions" => [
+            {
+              "type" => "path",
+              "steps" => [
+                { "value" => "foo", "type" => "name", "position" => 4 },
+                { "value" => "bar", "type" => "name", "position" => 8 }
+              ]
+            }
+          ]
+        })
+      end
+    end
+
+    describe "foo.blah.baz.[fud, fud]" do
+      it "returns the expected expression and processed steps" do
+        # Setup
+        parser = Parser.new("foo.blah.baz.[fud, fud]")
+        parser.setup
+
+        # Test
+        expr = parser.expression(0)
+        # expect(expr.to_h).to match({
+        #   "type" => "unary",
+        #   "value" => "[",
+        #   "position" => 1,
+        #   "expressions" => [
+        #     {
+        #       "type" => "binary",
+        #       "value" => ".",
+        #       "position" => 5,
+        #       "lhs" => { "value" => "foo", "type" => "name", "position" => 4 },
+        #       "rhs" =>{ "value" => "bar", "type" => "name", "position" => 8 }
+        #     }
+        #   ]
+        # })
+
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "path",
+          "steps" => [
+            { "value" => "foo", "type" => "name", "position" => 3 },
+            { "value" => "blah", "type" => "name", "position" => 8 },
+            { "value" => "baz", "type" => "name", "position" => 12 },
+            {
+              "type" => "unary",
+              "value" => "[",
+              "position" => 14,
+              "expressions" => [
+                { "type" => "path", "steps" => [ { "value" => "fud", "type" => "name", "position" => 17 } ] },
+                { "type" => "path", "steps" => [ { "value" => "fud", "type" => "name", "position" => 22 } ] }
+              ],
+              "consarray" => true
+            }
+          ]
+        })
+      end
+    end
+
+    describe "with predicate" do
+      describe "[1,2,3][0]" do
+        it "returns the expected expression and processed steps" do
+          # Setup
+          parser = Parser.new("[1,2,3][0]")
+          parser.setup
+
+          # Test
+          expr = parser.expression(0)
+          # debugger
+          expect(expr.to_h).to match({
+            "value" => "[",
+            "type" => "binary",
+            "position" => 8,
+            "lhs" => {
+              "value" => "[",
+              "type" => "unary",
+              "position" => 1,
+              "expressions" => [
+                { "value" => 1, "type" => "number", "position" => 2 },
+                { "value" => 2, "type" => "number", "position" => 4 },
+                { "value" => 3, "type" => "number", "position" => 6 }
+              ]
+            },
+            "rhs" => { "value" => 0, "type" => "number", "position" => 9 }
+          })
+
+          expr = parser.process_ast(expr)
+          expect(expr.to_h).to match({
+            "type" => "unary",
+            "value" => "[",
+            "position" => 1,
+            "expressions" => [
+              { "value" => 1, "type" => "number", "position" => 2 },
+              { "value" => 2, "type" => "number", "position" => 4 },
+              { "value" => 3, "type" => "number", "position" => 6 }
+            ],
+            "predicates" => [
+              {
+                "type" => "filter",
+                "expression" => { "value" => 0, "type" => "number", "position" => 9 },
+                "position" => 8
+              }
+            ]
+          })
+        end
+      end
+    end
+  end
+
   describe "boolean expressions" do
     describe "boolean only" do
       describe "true" do
@@ -49,7 +322,7 @@ describe Parser do
     end
 
     describe "boolean with operator" do
-      describe "'and' operator" do
+      describe "\"and\" operator" do
         describe "true and true" do
           it "returns the expected expression and processed steps" do
             # Setup
@@ -59,20 +332,20 @@ describe Parser do
             # Test
             expr = parser.expression(0)
             expect(expr.to_h).to match({
-              "value" => 'and',
-              "type" => 'binary',
+              "value" => "and",
+              "type" => "binary",
               "position" => 8,
-              "lhs" => { "value" => true, "type" => 'value', "position" => 4 },
-              "rhs" => { "value" => true, "type" => 'value', "position" => 13 }
+              "lhs" => { "value" => true, "type" => "value", "position" => 4 },
+              "rhs" => { "value" => true, "type" => "value", "position" => 13 }
             })
       
             expr = parser.process_ast(expr)
             expect(expr.to_h).to match({
-              "value" => 'and',
-              "type" => 'binary',
+              "value" => "and",
+              "type" => "binary",
               "position" => 8,
-              "lhs" => { "value" => true, "type" => 'value', "position" => 4 },
-              "rhs" => { "value" => true, "type" => 'value', "position" => 13 }
+              "lhs" => { "value" => true, "type" => "value", "position" => 4 },
+              "rhs" => { "value" => true, "type" => "value", "position" => 13 }
             })
           end
         end
@@ -86,20 +359,20 @@ describe Parser do
             # Test
             expr = parser.expression(0)
             expect(expr.to_h).to match({
-              "value" => 'and',
-              "type" => 'binary',
+              "value" => "and",
+              "type" => "binary",
               "position" => 8,
-              "lhs" => { "value" => true, "type" => 'value', "position" => 4 },
-              "rhs" => { "value" => false, "type" => 'value', "position" => 14 }
+              "lhs" => { "value" => true, "type" => "value", "position" => 4 },
+              "rhs" => { "value" => false, "type" => "value", "position" => 14 }
             })
       
             expr = parser.process_ast(expr)
             expect(expr.to_h).to match({
-              "value" => 'and',
-              "type" => 'binary',
+              "value" => "and",
+              "type" => "binary",
               "position" => 8,
-              "lhs" => { "value" => true, "type" => 'value', "position" => 4 },
-              "rhs" => { "value" => false, "type" => 'value', "position" => 14 }
+              "lhs" => { "value" => true, "type" => "value", "position" => 4 },
+              "rhs" => { "value" => false, "type" => "value", "position" => 14 }
             })
           end
         end
@@ -113,20 +386,20 @@ describe Parser do
             # Test
             expr = parser.expression(0)
             expect(expr.to_h).to match({
-              "value" => 'and',
-              "type" => 'binary',
+              "value" => "and",
+              "type" => "binary",
               "position" => 9,
-              "lhs" => { "value" => false, "type" => 'value', "position" => 5 },
-              "rhs" => { "value" => true, "type" => 'value', "position" => 14 }
+              "lhs" => { "value" => false, "type" => "value", "position" => 5 },
+              "rhs" => { "value" => true, "type" => "value", "position" => 14 }
             })
       
             expr = parser.process_ast(expr)
             expect(expr.to_h).to match({
-              "value" => 'and',
-              "type" => 'binary',
+              "value" => "and",
+              "type" => "binary",
               "position" => 9,
-              "lhs" => { "value" => false, "type" => 'value', "position" => 5 },
-              "rhs" => { "value" => true, "type" => 'value', "position" => 14 }
+              "lhs" => { "value" => false, "type" => "value", "position" => 5 },
+              "rhs" => { "value" => true, "type" => "value", "position" => 14 }
             })
           end
         end
@@ -140,26 +413,26 @@ describe Parser do
             # Test
             expr = parser.expression(0)
             expect(expr.to_h).to match({
-              "value" => 'and',
-              "type" => 'binary',
+              "value" => "and",
+              "type" => "binary",
               "position" => 9,
-              "lhs" => { "value" => false, "type" => 'value', "position" => 5 },
-              "rhs" => { "value" => false, "type" => 'value', "position" => 15 }
+              "lhs" => { "value" => false, "type" => "value", "position" => 5 },
+              "rhs" => { "value" => false, "type" => "value", "position" => 15 }
             })
       
             expr = parser.process_ast(expr)
             expect(expr.to_h).to match({
-              "value" => 'and',
-              "type" => 'binary',
+              "value" => "and",
+              "type" => "binary",
               "position" => 9,
-              "lhs" => { "value" => false, "type" => 'value', "position" => 5 },
-              "rhs" => { "value" => false, "type" => 'value', "position" => 15 }
+              "lhs" => { "value" => false, "type" => "value", "position" => 5 },
+              "rhs" => { "value" => false, "type" => "value", "position" => 15 }
             })
           end
         end
       end
 
-      describe "'or' operator" do
+      describe "\"or\" operator" do
         describe "true or true" do
           it "returns the expected expression and processed steps" do
             # Setup
@@ -169,20 +442,20 @@ describe Parser do
             # Test
             expr = parser.expression(0)
             expect(expr.to_h).to match({
-              "value" => 'or',
-              "type" => 'binary',
+              "value" => "or",
+              "type" => "binary",
               "position" => 7,
-              "lhs" => { "value" => true, "type" => 'value', "position" => 4 },
-              "rhs" => { "value" => true, "type" => 'value', "position" => 12 }
+              "lhs" => { "value" => true, "type" => "value", "position" => 4 },
+              "rhs" => { "value" => true, "type" => "value", "position" => 12 }
             })
       
             expr = parser.process_ast(expr)
             expect(expr.to_h).to match({
-              "value" => 'or',
-              "type" => 'binary',
+              "value" => "or",
+              "type" => "binary",
               "position" => 7,
-              "lhs" => { "value" => true, "type" => 'value', "position" => 4 },
-              "rhs" => { "value" => true, "type" => 'value', "position" => 12 }
+              "lhs" => { "value" => true, "type" => "value", "position" => 4 },
+              "rhs" => { "value" => true, "type" => "value", "position" => 12 }
             })
           end
         end
@@ -196,20 +469,20 @@ describe Parser do
             # Test
             expr = parser.expression(0)
             expect(expr.to_h).to match({
-              "value" => 'or',
-              "type" => 'binary',
+              "value" => "or",
+              "type" => "binary",
               "position" => 7,
-              "lhs" => { "value" => true, "type" => 'value', "position" => 4 },
-              "rhs" => { "value" => false, "type" => 'value', "position" => 13 }
+              "lhs" => { "value" => true, "type" => "value", "position" => 4 },
+              "rhs" => { "value" => false, "type" => "value", "position" => 13 }
             })
       
             expr = parser.process_ast(expr)
             expect(expr.to_h).to match({
-              "value" => 'or',
-              "type" => 'binary',
+              "value" => "or",
+              "type" => "binary",
               "position" => 7,
-              "lhs" => { "value" => true, "type" => 'value', "position" => 4 },
-              "rhs" => { "value" => false, "type" => 'value', "position" => 13 }
+              "lhs" => { "value" => true, "type" => "value", "position" => 4 },
+              "rhs" => { "value" => false, "type" => "value", "position" => 13 }
             })
           end
         end
@@ -223,20 +496,20 @@ describe Parser do
             # Test
             expr = parser.expression(0)
             expect(expr.to_h).to match({
-              "value" => 'or',
-              "type" => 'binary',
+              "value" => "or",
+              "type" => "binary",
               "position" => 8,
-              "lhs" => { "value" => false, "type" => 'value', "position" => 5 },
-              "rhs" => { "value" => true, "type" => 'value', "position" => 13 }
+              "lhs" => { "value" => false, "type" => "value", "position" => 5 },
+              "rhs" => { "value" => true, "type" => "value", "position" => 13 }
             })
       
             expr = parser.process_ast(expr)
             expect(expr.to_h).to match({
-              "value" => 'or',
-              "type" => 'binary',
+              "value" => "or",
+              "type" => "binary",
               "position" => 8,
-              "lhs" => { "value" => false, "type" => 'value', "position" => 5 },
-              "rhs" => { "value" => true, "type" => 'value', "position" => 13 }
+              "lhs" => { "value" => false, "type" => "value", "position" => 5 },
+              "rhs" => { "value" => true, "type" => "value", "position" => 13 }
             })
           end
         end
@@ -250,20 +523,20 @@ describe Parser do
             # Test
             expr = parser.expression(0)
             expect(expr.to_h).to match({
-              "value" => 'or',
-              "type" => 'binary',
+              "value" => "or",
+              "type" => "binary",
               "position" => 8,
-              "lhs" => { "value" => false, "type" => 'value', "position" => 5 },
-              "rhs" => { "value" => false, "type" => 'value', "position" => 14 }
+              "lhs" => { "value" => false, "type" => "value", "position" => 5 },
+              "rhs" => { "value" => false, "type" => "value", "position" => 14 }
             })
       
             expr = parser.process_ast(expr)
             expect(expr.to_h).to match({
-              "value" => 'or',
-              "type" => 'binary',
+              "value" => "or",
+              "type" => "binary",
               "position" => 8,
-              "lhs" => { "value" => false, "type" => 'value', "position" => 5 },
-              "rhs" => { "value" => false, "type" => 'value', "position" => 14 }
+              "lhs" => { "value" => false, "type" => "value", "position" => 5 },
+              "rhs" => { "value" => false, "type" => "value", "position" => 14 }
             })
           end
         end
@@ -280,25 +553,25 @@ describe Parser do
           # Test
           expr = parser.expression(0)
           expect(expr.to_h).to match({
-            "value" => 'and',
-            "type" => 'binary',
+            "value" => "and",
+            "type" => "binary",
             "position" => 7,
-            "lhs" => { "value" => 'foo', "type" => 'name', "position" => 3 },
-            "rhs" => { "value" => 'bar', "type" => 'name', "position" => 11 }
+            "lhs" => { "value" => "foo", "type" => "name", "position" => 3 },
+            "rhs" => { "value" => "bar", "type" => "name", "position" => 11 }
           })
     
           expr = parser.process_ast(expr)
           expect(expr.to_h).to match({
-            "value" => 'and',
-            "type" => 'binary',
+            "value" => "and",
+            "type" => "binary",
             "position" => 7,
             "lhs" => {
-              "type" => 'path',
-              "steps" => [ { "value" => 'foo', "type" => 'name', "position" => 3 } ]
+              "type" => "path",
+              "steps" => [ { "value" => "foo", "type" => "name", "position" => 3 } ]
             },
             "rhs" => {
-              "type" => 'path',
-              "steps" => [ { "value" => 'bar', "type" => 'name', "position" => 11 } ]
+              "type" => "path",
+              "steps" => [ { "value" => "bar", "type" => "name", "position" => 11 } ]
             }
           })
         end

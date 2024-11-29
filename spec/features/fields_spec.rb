@@ -2,7 +2,7 @@ require "./lib/jsonata"
 require "json"
 
 # These are test cases copied over from the source JS repo
-describe "Field Datasets" do
+describe "Fields" do
   it "case000" do
     jsonata = build_jsonata(
       expr: "foo.bar",

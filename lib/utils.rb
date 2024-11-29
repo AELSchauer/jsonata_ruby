@@ -3,6 +3,30 @@ require "./lib/jsonata_exception"
 
 class Utils
   class << self
+    # TO-DO
+    def create_sequence(arg = [])
+      arg = if !arg.is_a?(Array)
+        [arg]
+      elsif arg.length == 1
+        [arg.first]
+      else
+        arg
+      end
+      Utils.set(arg, :sequence, true)
+      arg
+    end
+
+    # TO-DO
+    def get(obj, key)
+      obj.instance_variable_get("@#{key}")
+    end
+
+    # TO-DO
+    def set(obj, key, val)
+      obj.instance_variable_set("@#{key}", val)
+      obj
+    end
+
     # Check if value is a finite number
     # @param {float} n - number to evaluate
     # @returns {boolean} True if n is a finite number
@@ -30,7 +54,7 @@ class Utils
     # @returns {boolean} True if arg is an array of numbers
     def is_array_of_numbers(arg)
       return false unless arg.is_a?(Array)
-      arg.all? { |item| is_numeric(item) }
+      arg.all? { |item| is_numeric?(item) }
     end
 
     
@@ -66,15 +90,7 @@ class Utils
     end
 
     def is_function?(arg)
-      puts "IS_FUNCTION TO-DO"
       false
-    end
-
-    # Tests if a value is a sequence
-    # @param {*} value the value to test
-    # @returns {boolean} true if it's a sequence
-    def is_sequence?(value)
-      value.class.to_s == "JSymbol::Sequence"
     end
 
     # converts a string to an array of characters

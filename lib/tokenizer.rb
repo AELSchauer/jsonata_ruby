@@ -3,6 +3,34 @@ require "./lib/j_symbol"
 require "debug"
 
 class Tokenizer
+  INFIXES = [
+    # "-",
+    # "!=",
+    # "?",
+    ".",
+    # "(",
+    # "(error)",
+    "[",
+    # "{",
+    # "@",
+    # "*",
+    # "/",
+    # "&",
+    # "#",
+    # "%",
+    # "^",
+    # "+",
+    # "<",
+    # "<=",
+    # "=",
+    # ">",
+    # ">=",
+    # "~>",
+    "and",
+    # "in",
+    "or"
+  ].freeze
+
   OPERATORS = {
     '.' => 75,
     '[' => 80,
@@ -196,7 +224,8 @@ class Tokenizer
     if match.present?
       num = match[0].to_f
       if !num.nan? && num.finite?
-        position += match[0].length
+        @position += match[0].length
+        num = match[0].index(".").nil? ? num.to_i : num
         return create("number", num)
       else
         # raise JsonataException.new("S0102", {position: position})
@@ -209,7 +238,7 @@ class Tokenizer
     if current_char == "`"
       # scan for closing quote
       @position += 1
-      end_pos = @path.index("`", position)
+      end_pos = @path.index("`", @position)
       if end_pos != -1
         name = @path[@position, end_pos]
         @position = end_pos + 1

@@ -1,23 +1,23 @@
 require "./lib/utils"
 
 describe Utils do
-  describe ".is_numeric" do
+  describe ".is_numeric?" do
     it "returns false when not a numeric object" do
-      expect(described_class.is_numeric("a")).to eq(false)
-      expect(described_class.is_numeric("1")).to eq(false)
+      expect(described_class.is_numeric?("a")).to eq(false)
+      expect(described_class.is_numeric?("1")).to eq(false)
     end
 
     it "returns true when it is a number" do
-      expect(described_class.is_numeric(1)).to eq(true)
-      expect(described_class.is_numeric(1.0)).to eq(true)
+      expect(described_class.is_numeric?(1)).to eq(true)
+      expect(described_class.is_numeric?(1.0)).to eq(true)
     end
 
     it "returns false when it is NaN" do
-      expect(described_class.is_numeric(Float::NAN)).to eq(false)
+      expect(described_class.is_numeric?(Float::NAN)).to eq(false)
     end
 
     it "throws an error when it is Infinity" do
-      expect { described_class.is_numeric(Float::INFINITY) }.to raise_error(JsonataException, /"code":"D1001"/)
+      expect { described_class.is_numeric?(Float::INFINITY) }.to raise_error(JsonataException, /"code":"D1001"/)
     end
   end
 
