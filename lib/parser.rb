@@ -46,6 +46,7 @@ class Parser
 
     # Infix Only
     symbol(".") # map operator
+    symbol(">") # greater than
     symbol("and") # Boolean AND
     symbol("or") # Boolean OR
 

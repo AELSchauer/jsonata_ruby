@@ -630,6 +630,7 @@ describe Parser do
             "value" => '-',
             "type" => 'unary',
             "position" => 3,
+            "expressions" => [],
             "expression" => { "value" => 3, "type" => 'number', "position" => 4 }
           }
         })
