@@ -46,6 +46,12 @@ class Parser
 
     # Infix Only
     symbol(".") # map operator
+    symbol("=") # equal to
+    symbol(">") # greater than
+    symbol("<") # less than
+    symbol("!=") # not equal to
+    symbol(">=") # greater than or equal to
+    symbol("<=") # less than or equal to
     symbol("and") # Boolean AND
     symbol("or") # Boolean OR
 
@@ -83,7 +89,7 @@ class Parser
     when "operator"
       sym = @symbol_table[value]
       if sym.blank?
-        raise "S0204"
+        raise "S0204 -- #{value}"
       end
     when "string", "number", "value"
       sym = @symbol_table["(literal)"]

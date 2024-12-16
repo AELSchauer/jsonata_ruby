@@ -32,7 +32,7 @@ module JSymbol
 
     def to_h
       map_vars = [:@consarray, :@expression, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value]
-      map_vars.concat([:@expressions])  if @type == "unary"
+      map_vars.concat([:@expressions]) if @type == "unary"
       map_vars
         .reject { |key| instance_variable_get(key).nil? }
         .reduce({}) do |hsh, key|
@@ -54,14 +54,13 @@ module JSymbol
           @rhs = @context.expression(Tokenizer::OPERATORS["]"]);
           @type = "binary";
           @context.advance("]", true);
-          self
         end
       else
         @lhs = left
         @rhs = @context.expression(@lbp)
         @type = "binary"
-        self
       end
+      self
     end
 
 

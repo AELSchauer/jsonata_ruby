@@ -87,14 +87,14 @@ class Jsonata
       end
     end
 
-    begin
-      case rhs
+    # begin
+      case op
       when "+", "-", "*", "/", "%"
         raise "EVALUATE BINARY -- evaluateNumericExpression"
       when "=", "!="
-        raise "EVALUATE BINARY -- evaluateEqualityExpression"
+        evaluate_equality_expression(lhs, rhs, op)
       when "<", "<=", ">", ">="
-        raise "EVALUATE BINARY -- evaluateComparisonExpression"
+        evaluate_comparison_expression(lhs, rhs, op)
       when "&"
         raise "EVALUATE BINARY -- evaluateStringConcat"
       when ".."
@@ -102,9 +102,9 @@ class Jsonata
       when "in"
         raise "EVALUATE BINARY -- evaluateIncludesExpression"
       end
-    rescue
-      raise "EVALUATE BINARY EXPRESSION ERROR"
-    end
+    # rescue => e
+    #   raise "EVALUATE BINARY EXPRESSION ERROR"
+    # end
   end
 
   # Evaluate boolean expression against input data
@@ -121,7 +121,55 @@ class Jsonata
     end
   end
 
-  # A# pply filter predicate to input data
+
+  # Evaluate comparison expression against input data
+  # @param {Object} lhs - LHS value
+  # @param {Object} rhs - RHS value
+  # @param {Object} op - opcode
+  # @returns {*} Result
+  def evaluate_comparison_expression(lhs, rhs, op)
+    return nil if lhs.nil? || rhs.nil?
+
+    l_comparable = lhs.is_a?(String) || lhs.is_a?(Numeric)
+    r_comparable = rhs.is_a?(String) || rhs.is_a?(Numeric)
+
+    if !l_comparable || !r_comparable
+      raise "T2010"
+    end
+
+    if lhs.class != rhs.class
+      raise "T2009"
+    end
+
+    case op
+    when "<"
+      lhs < rhs
+    when "<="
+      lhs <= rhs
+    when ">"
+      lhs > rhs
+    when ">="
+      lhs >= rhs
+    end
+  end
+
+  # Evaluate equality expression against input data
+  # @param {Object} lhs - LHS value
+  # @param {Object} rhs - RHS value
+  # @param {Object} op - opcode
+  # @returns {*} Result
+  def evaluate_equality_expression(lhs, rhs, op)
+    return false if lhs.nil? || rhs.nil?
+
+    case op
+    when "="
+      Utils.is_deep_equal(lhs, rhs)
+    when "!="
+      !Utils.is_deep_equal(lhs, rhs)
+    end
+  end
+
+  # Apply filter predicate to input data
   # @param {Object} predicate - filter expression
   # @param {Object} input - Input data to a# pply predicates against
   # @param {Object} environment - Environment

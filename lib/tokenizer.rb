@@ -5,7 +5,7 @@ require "debug"
 class Tokenizer
   INFIXES = [
     # "-",
-    # "!=",
+    "!=",
     # "?",
     ".",
     # "(",
@@ -20,11 +20,11 @@ class Tokenizer
     # "%",
     # "^",
     # "+",
-    # "<",
-    # "<=",
-    # "=",
-    # ">",
-    # ">=",
+    "<",
+    "<=",
+    "=",
+    ">",
+    ">=",
     # "~>",
     "and",
     # "in",
@@ -220,7 +220,7 @@ class Tokenizer
 
     # test for numbers
     numregex = /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?/
-    match = numregex.match(@path[@position])
+    match = numregex.match(@path[@position..-1])
     if match.present?
       num = match[0].to_f
       if !num.nan? && num.finite?
