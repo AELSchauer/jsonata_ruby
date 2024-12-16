@@ -159,8 +159,6 @@ class Jsonata
   # @param {Object} op - opcode
   # @returns {*} Result
   def evaluate_equality_expression(lhs, rhs, op)
-    return false if lhs.nil? || rhs.nil?
-
     case op
     when "="
       Utils.is_deep_equal(lhs, rhs)
