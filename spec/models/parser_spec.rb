@@ -612,6 +612,40 @@ describe Parser do
     end
   end
 
+  describe "comparison operators" do
+    describe "3>-3" do
+      it "returns the expected expression and processed steps" do
+        ## Setup
+        parser = Parser.new("3>-3")
+        parser.setup
+
+        ## Test      
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "value" => '>',
+          "type" => 'binary',
+          "position" => 2,
+          "lhs" => { "value" => 3, "type" => 'number', "position" => 1 },
+          "rhs" => {
+            "value" => '-',
+            "type" => 'unary',
+            "position" => 3,
+            "expression" => { "value" => 3, "type" => 'number', "position" => 4 }
+          }
+        })
+  
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => 'binary',
+          "value" => '>',
+          "position" => 2,
+          "lhs" => { "value" => 3, "type" => 'number', "position" => 1 },
+          "rhs" => { "value" => -3, "type" => 'number', "position" => 4 }
+        })
+      end
+    end
+  end
+
   describe "fields" do
     describe "foo" do
       it "returns the expected expression and processed steps" do

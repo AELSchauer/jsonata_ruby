@@ -83,7 +83,7 @@ class Parser
     when "operator"
       sym = @symbol_table[value]
       if sym.blank?
-        raise "S0204"
+        raise "S0204 -- #{value}"
       end
     when "string", "number", "value"
       sym = @symbol_table["(literal)"]
