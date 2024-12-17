@@ -35,7 +35,8 @@ class Utils
       if n.is_a?(Numeric)
         is_num = !n.to_f.nan?
         if is_num && !n.finite?
-          raise JsonataException.new("D1001", {value: n.to_s})
+          # raise JsonataException.new("D1001", {value: n.to_s})
+          raise "D1001"
         end
       end
       is_num

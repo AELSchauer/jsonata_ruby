@@ -17,7 +17,8 @@ describe Utils do
     end
 
     it "throws an error when it is Infinity" do
-      expect { described_class.is_numeric?(Float::INFINITY) }.to raise_error(JsonataException, /"code":"D1001"/)
+      # expect { described_class.is_numeric?(Float::INFINITY) }.to raise_error(JsonataException, /"code":"D1001"/)
+      expect { described_class.is_numeric?(Float::INFINITY) }.to raise_error("D1001")
     end
   end
 
@@ -50,7 +51,8 @@ describe Utils do
     end
 
     it "throws an error when arg is an array and any element is Infinity" do
-      expect { described_class.is_array_of_numbers([Float::INFINITY]) }.to raise_error(JsonataException, /"code":"D1001"/)
+      # expect { described_class.is_array_of_numbers([Float::INFINITY]) }.to raise_error(JsonataException, /"code":"D1001"/)
+      expect { described_class.is_array_of_numbers([Float::INFINITY]) }.to raise_error("D1001")
     end
   end
 

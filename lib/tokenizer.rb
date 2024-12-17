@@ -4,7 +4,7 @@ require "debug"
 
 class Tokenizer
   INFIXES = [
-    # "-",
+    "-",
     "!=",
     # "?",
     ".",
@@ -13,13 +13,13 @@ class Tokenizer
     "[",
     # "{",
     # "@",
-    # "*",
-    # "/",
+    "*",
+    "/",
     # "&",
     # "#",
-    # "%",
+    "%",
     # "^",
-    # "+",
+    "+",
     "<",
     "<=",
     "=",
@@ -225,7 +225,6 @@ class Tokenizer
       num = match[0].to_f
       if !num.nan? && num.finite?
         @position += match[0].length
-        num = match[0].index(".").nil? ? num.to_i : num
         return create("number", num)
       else
         # raise JsonataException.new("S0102", {position: position})

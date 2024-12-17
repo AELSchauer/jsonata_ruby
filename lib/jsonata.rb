@@ -90,7 +90,7 @@ class Jsonata
     # begin
       case op
       when "+", "-", "*", "/", "%"
-        raise "EVALUATE BINARY -- evaluateNumericExpression"
+        evaluate_numeric_expression(lhs, rhs, op)
       when "=", "!="
         evaluate_equality_expression(lhs, rhs, op)
       when "<", "<=", ">", ">="
@@ -164,6 +164,32 @@ class Jsonata
       Utils.is_deep_equal(lhs, rhs)
     when "!="
       !Utils.is_deep_equal(lhs, rhs)
+    end
+  end
+
+  # Evaluate numeric expression against input data
+  # @param {Object} lhs - LHS value
+  # @param {Object} rhs - RHS value
+  # @param {Object} op - opcode
+  # @returns {*} Result
+  def evaluate_numeric_expression(lhs, rhs, op)
+    return nil if lhs.nil? || rhs.nil?
+    raise "T2001" unless Utils.is_numeric?(lhs)
+    raise "T2002" unless Utils.is_numeric?(rhs)
+
+    case op
+    when "+"
+      lhs + rhs
+    when "-"
+      lhs - rhs
+    when "*"
+      lhs * rhs
+    when "/"
+      result_float = lhs.is_a?(Float) || rhs.is_a?(Float)
+      result = lhs.to_f / rhs.to_f
+      !result_float && result % 1 == 0 ? result.to_i : result
+    when "%"
+      lhs % rhs
     end
   end
 

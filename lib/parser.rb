@@ -46,6 +46,10 @@ class Parser
 
     # Infix Only
     symbol(".") # map operator
+    symbol("+") # numeric addition
+    symbol("*") # numeric multiplication
+    symbol("/") # numeric division
+    symbol("%") # numeric modulus
     symbol("=") # equal to
     symbol(">") # greater than
     symbol("<") # less than
