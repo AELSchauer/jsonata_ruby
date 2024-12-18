@@ -1,7 +1,7 @@
 module JSymbol
   class Base
     attr_reader :arguments, :focus, :group, :id, :keep_array, :keep_singleton, :level, :lhs, :procedure, :rhs, :sequence, :steps, :terms, :tuple_stream, :then_proc, :tuple
-    attr_accessor :consarray, :expression, :expressions, :lbp, :lhs, :predicates, :position, :rhs, :stages, :type, :value
+    attr_accessor :consarray, :expression, :expressions, :group, :lbp, :lhs, :predicates, :position, :rhs, :stages, :type, :value
 
     attr_accessor :keep_singleton_array, :seeking_parent
 
@@ -31,14 +31,14 @@ module JSymbol
     end
 
     def to_h
-      map_vars = [:@consarray, :@expression, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value]
+      map_vars = [:@consarray, :@expression, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value, :@group]
       map_vars.concat([:@expressions]) if @type == "unary"
       map_vars
         .reject { |key| instance_variable_get(key).nil? }
         .reduce({}) do |hsh, key|
           value = instance_variable_get(key)
           value = value.to_h if value.is_a?(JSymbol::Base)
-          value = value.map(&:to_h) if value.is_a?(Array)
+          value = map_array(value) if value.is_a?(Array)
           hsh.merge({key.to_s.sub("@", "") => value})
         end
     end
@@ -55,14 +55,19 @@ module JSymbol
           @type = "binary";
           @context.advance("]", true);
         end
+      when "{"
+        @lhs = left
+        @rhs = object_parser
+        @type = "binary"
+        # debugger
       else
         @lhs = left
         @rhs = @context.expression(@lbp)
         @type = "binary"
+        # debugger
       end
       self
     end
-
 
     def nud
       case @value
@@ -91,12 +96,39 @@ module JSymbol
         @context.advance("]", true)
         @expressions = arr
         @type = "unary"
+      when "{"
+        @lhs = object_parser
+        @type = "unary"
       when "-"
         @expression = @context.expression(70);
         @type = "unary";
       end
 
       self
+    end
+
+    private
+
+    def object_parser
+      a = []
+      if @context.node.id != "}"
+        while true
+          n = @context.expression(0)
+          @context.advance(":")
+          v = @context.expression(0)
+          a << [n, v] # holds an array of name/value expression pairs
+          break if @context.node.id != ","
+          @context.advance(",")
+        end
+      end
+      @context.advance("}", true)
+      a
+    end
+
+    def map_array(arr)
+      arr.map do |ele|
+        ele.is_a?(Array) ? map_array(ele) : ele.to_h
+      end
     end
   end
 end

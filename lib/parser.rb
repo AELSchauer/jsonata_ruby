@@ -41,8 +41,10 @@ class Parser
     symbol("or")
 
     # Base Symbol
+    symbol(":")
     symbol(",")
     symbol("]")
+    symbol("}")
 
     # Infix Only
     symbol(".") # map operator
@@ -61,6 +63,7 @@ class Parser
 
     # Infix and Prefix
     symbol("[") # array constructor & filter - predicate or array index
+    symbol("{") # object constructor & object grouping
     symbol("-") # numeric subtraction & unary numeric negation
 
     advance
@@ -97,10 +100,10 @@ class Parser
       end
     when "string", "number", "value"
       sym = @symbol_table["(literal)"]
-    when "regex"
+    # when "regex"
       #
     else
-      #
+      puts "TO-DO ADVANCE"
     end
 
     @node = sym.dup
@@ -221,7 +224,19 @@ class Parser
           )
         )
       when "{"
-        raise "BINARY {"
+        # group-by
+        # LHS is a step or a predicated step
+        # RHS is the object constructor expr
+        result = process_ast(expr.lhs)
+        unless result.group.nil?
+          raise "S0210"
+        end
+        # object constructor - process each pair
+        result.group = JSymbol::Base.new(
+          context: self,
+          position: expr.position,
+          lhs: expr.rhs.map { |(e0, e1)| [process_ast(e0), process_ast(e1)] }
+        )
       when "^"
         raise "BINARY ^"
       when ":="
@@ -258,7 +273,21 @@ class Parser
           value
         end
       elsif expr.value == "{"
-        raise "UNARY -- object constructor - process each pair"
+        # raise "UNARY -- object constructor - process each pair"
+        # result.lhs = expr.lhs.map(function (pair) {
+        #   var key = processAST(pair[0]);
+        #   pushAncestry(result, key);
+        #   var value = processAST(pair[1]);
+        #   pushAncestry(result, value);
+        #   return [key, value];
+        # });
+        result.lhs = expr.lhs.map do |pair|
+          key = process_ast(pair[0])
+          push_ancestry(result, key)
+          val = process_ast(pair[1])
+          push_ancestry(result, val)
+          [key, val]
+        end
       else
         result.expression = process_ast(expr.expression)
         # if unary minus on a number, then pre-process

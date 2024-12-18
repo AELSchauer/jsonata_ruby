@@ -166,21 +166,21 @@ describe "Comparison Operators" do
   end
 
   it "case019" do
-    # jsonata = build_jsonata(
-    #   expr: "bar = foo.bar + 56",
-    #   dataset: "dataset0"
-    # )
+    jsonata = build_jsonata(
+      expr: "bar = foo.bar + 56",
+      dataset: "dataset0"
+    )
 
-    # expect(jsonata.call).to eq(true)
+    expect(jsonata.call).to eq(true)
   end
 
   it "case020" do
-    # jsonata = build_jsonata(
-    #   expr: "bar !=foo.bar + 56",
-    #   dataset: "dataset0"
-    # )
+    jsonata = build_jsonata(
+      expr: "bar !=foo.bar + 56",
+      dataset: "dataset0"
+    )
 
-    # expect(jsonata.call).to eq(false)
+    expect(jsonata.call).to eq(false)
   end
 
   it "case021" do
@@ -253,10 +253,22 @@ describe "Comparison Operators" do
 
   it "case027" do
     # TO-DO
+    # Undefined result
+    # jsonata = build_jsonata(
+    #   expr:  "3 > $x",
+    # )
+
+    # expect(jsonata.call).to eq()
   end
 
   it "case028" do
     # TO-DO
+    # Undefined result
+    # jsonata = build_jsonata(
+    #   expr:  "$x <= \"hello\"",
+    # )
+
+    # expect(jsonata.call).to eq()
   end
 
   # Helper setup functions

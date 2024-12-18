@@ -191,7 +191,7 @@ describe "Array Constructors" do
     #   data: nil
     # )
 
-    # expect(jsonata.call).to eq([0,2,4,6,8)
+    # expect(jsonata.call).to eq([0,2,4,6,8])
   end
 
   it "case018" do

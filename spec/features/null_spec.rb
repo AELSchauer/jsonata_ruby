@@ -53,16 +53,15 @@ describe "Null" do
   end
 
   it "case006" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "{\"true\": true, \"false\":false, \"null\": null}"
-    # )
+    jsonata = build_jsonata(
+      expr: "{\"true\": true, \"false\":false, \"null\": null}"
+    )
 
-    # expect(jsonata.call).to eq({
-    #   "true" => true,
-    #   "false" => false,
-    #   "null" => nil
-    # })
+    expect(jsonata.call).to eq({
+      "true" => true,
+      "false" => false,
+      "null" => nil
+    })
   end
 
   # Helper setup functions

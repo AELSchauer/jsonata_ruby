@@ -11,7 +11,7 @@ class Tokenizer
     # "(",
     # "(error)",
     "[",
-    # "{",
+    "{",
     # "@",
     "*",
     "/",
@@ -174,11 +174,6 @@ class Tokenizer
     if OPERATORS[current_char].present?
       @position += 1
       return create("operator", current_char)
-    end
-    if current_char == "~" && @path[@position + 1] == ">"
-      # ~>
-      @position += 2
-      return create("operator", "~>")
     end
 
     # test for string literals

@@ -622,26 +622,26 @@ describe Parser do
         ## Test      
         expr = parser.expression(0)
         expect(expr.to_h).to match({
-          "value" => '>',
-          "type" => 'binary',
+          "value" => ">",
+          "type" => "binary",
           "position" => 2,
-          "lhs" => { "value" => 3, "type" => 'number', "position" => 1 },
+          "lhs" => { "value" => 3, "type" => "number", "position" => 1 },
           "rhs" => {
-            "value" => '-',
-            "type" => 'unary',
+            "value" => "-",
+            "type" => "unary",
             "position" => 3,
             "expressions" => [],
-            "expression" => { "value" => 3, "type" => 'number', "position" => 4 }
+            "expression" => { "value" => 3, "type" => "number", "position" => 4 }
           }
         })
   
         expr = parser.process_ast(expr)
         expect(expr.to_h).to match({
-          "type" => 'binary',
-          "value" => '>',
+          "type" => "binary",
+          "value" => ">",
           "position" => 2,
-          "lhs" => { "value" => 3, "type" => 'number', "position" => 1 },
-          "rhs" => { "value" => -3, "type" => 'number', "position" => 4 }
+          "lhs" => { "value" => 3, "type" => "number", "position" => 1 },
+          "rhs" => { "value" => -3, "type" => "number", "position" => 4 }
         })
       end
     end
@@ -655,20 +655,20 @@ describe Parser do
         ## Test      
         expr = parser.expression(0)
         expect(expr.to_h).to match({
-          "value" => '<',
-          "type" => 'binary',
+          "value" => "<",
+          "type" => "binary",
           "position" => 6,
-          "lhs" => { "value" => "32", "type" => 'string', "position" => 4 },
-          "rhs" => { "value" => 42, "type" => 'number', "position" => 9 }
+          "lhs" => { "value" => "32", "type" => "string", "position" => 4 },
+          "rhs" => { "value" => 42, "type" => "number", "position" => 9 }
         })
   
         expr = parser.process_ast(expr)
         expect(expr.to_h).to match({
-          "value" => '<',
-          "type" => 'binary',
+          "value" => "<",
+          "type" => "binary",
           "position" => 6,
-          "lhs" => { "value" => "32", "type" => 'string', "position" => 4 },
-          "rhs" => { "value" => 42, "type" => 'number', "position" => 9 }
+          "lhs" => { "value" => "32", "type" => "string", "position" => 4 },
+          "rhs" => { "value" => 42, "type" => "number", "position" => 9 }
         })
       end
     end
@@ -750,6 +750,150 @@ describe Parser do
             {"type"=>"name", "value"=>"bar", "position"=>7},
             {"type"=>"name", "value"=>"bazz", "position"=>12},
           ]
+        })
+      end
+    end
+  end
+
+  describe "object constructors" do
+    describe "simple key/value pairs" do
+      it "returns the expected expression and processed steps" do
+        ## Setup
+        parser = Parser.new("{\"key\": \"value\"}")
+        parser.setup
+        
+        ## Test      
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "value" => "{",
+          "type" => "unary",
+          "position" => 1,
+          "expressions" => [],
+          "lhs" => [
+            [
+              { "value" => "key", "type" => "string", "position" => 6 },
+              { "value" => "value", "type" => "string", "position" => 15 }
+            ]
+          ]
+        })
+  
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "value" => "{",
+          "type" => "unary",
+          "position" => 1,
+          "expressions" => [],
+          "lhs" => [
+            [
+              { "value" => "key", "type" => "string", "position" => 6 },
+              { "value" => "value", "type" => "string", "position" => 15 }
+            ]
+          ]
+        })
+      end
+    end
+
+    describe "with fields and groups" do
+      it "returns the expected expression and processed steps" do
+        ## Setup
+        parser = Parser.new("Account.Order{OrderID: Product.\"Product Name\"}")
+        parser.setup
+        
+        ## Test      
+        expr = parser.expression(0)
+        # debugger
+        expect(expr.to_h).to match({
+          "value" => "{",
+          "type" => "binary",
+          "position" => 14,
+          "lhs" => {
+            "value" => ".",
+            "type" => "binary",
+            "position" => 8,
+            "lhs" => {
+              "value" => "Account",
+              "type" => "name",
+              "position" => 7
+            },
+            "rhs" => {
+              "value" => "Order",
+              "type" => "name",
+              "position" => 13
+            }
+          },
+          "rhs" => [
+            [
+              {
+                "value" => "OrderID",
+                "type" => "name",
+                "position" => 21
+              },
+              {
+                "value" => ".",
+                "type" => "binary",
+                "position" => 31,
+                "lhs" => {
+                  "value" => "Product",
+                  "type" => "name",
+                  "position" => 30
+                },
+                "rhs" => {
+                  "value" => "Product Name",
+                  "type" => "string",
+                  "position" => 45
+                }
+              }
+            ]
+          ]
+        })
+  
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "path",
+          "steps" => [
+            {
+              "value" => "Account",
+              "type" => "name",
+              "position" => 7
+            },
+            {
+              "value" => "Order",
+              "type" => "name",
+              "position" => 13
+            }
+          ],
+          "group" => {
+            "lhs" => [
+              [
+                {
+                  "type" => "path",
+                  "steps" => [
+                    {
+                      "value" => "OrderID",
+                      "type" => "name",
+                      "position" => 21
+                    }
+                  ]
+                },
+                {
+                  "type" => "path",
+                  "steps" => [
+                    {
+                      "value" => "Product",
+                      "type" => "name",
+                      "position" => 30
+                    },
+                    {
+                      "value" => "Product Name",
+                      "type" => "name",
+                      "position" => 45
+                    }
+                  ]
+                }
+              ]
+            ],
+            "position" => 14
+          }
         })
       end
     end

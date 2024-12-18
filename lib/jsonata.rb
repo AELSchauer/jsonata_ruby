@@ -8,6 +8,8 @@ class Jsonata
     @options = options
     @parser = Parser.new(expr)
     @fn = Functions.new(context: @parser)
+    @static_frame = Jsonata::Frame.new
+    @environment = Jsonata::Frame.new(@static_frame)
   end
 
   def call
@@ -16,7 +18,7 @@ class Jsonata
       @input = Utils.create_sequence(@input)
       Utils.set(@input, :outer_wrapper, true)
     end
-    evaluate(@expr, @input, nil) # TO-DO
+    evaluate(@expr, @input, @environment) # TO-DO
   end
 
   # Evaluate expression against input data
@@ -221,6 +223,66 @@ class Jsonata
     results
   end
 
+  # Evaluate group expression against input data
+  # @param {Object} expr - JSONata expression
+  # @param {Object} input - Input data to evaluate against
+  # @param {Object} environment - Environment
+  # @returns {{}} Evaluated input data
+  def evaluate_group_expression(expr, input, environment)
+    result = {}
+    groups = {}
+    is_reduce = input.is_a?(JSymbol) && input.tuple_stream
+    # group the input sequence by 'key' expression
+    input = Utils.create_sequence(input) if !input.is_a?(Array)
+
+    # if the array is empty, add a nil entry to enable literal JSON object to be generated
+    input << nil if input.length.zero?
+
+    input.each do |item|
+      env = if is_reduce
+        raise "createFrameFromTuple"
+      else
+        environment
+      end
+
+      expr.lhs.each.with_index do |pair, pair_idx|
+        key = evaluate(pair[0], is_reduce ? item["@"] : item, env)
+
+        if !key.is_a?(String) && !key.nil?
+          raise "T1003"
+        end
+
+        unless key.nil?
+          entry = {data: item, expr_idx: pair_idx}
+          if groups[key].present?
+            if groups[key][:expr_idx] != pair_idx
+              raise "D1009"
+            end
+
+            # append it as an array
+            groups[key][:data] = @fn.append(groups[key][:data], item)
+          else
+            groups[key] = entry
+          end
+        end
+      end
+    end
+
+    # iterate over the groups to evaluate the 'value' expression
+    groups.each_pair.with_index do |(key, entry), idx|
+      context = entry[:data]
+      env = environment
+      if is_reduce
+        raise "reduceTupleStream"
+      end
+      environment.is_parallel_call = idx > 0
+      value = evaluate(expr.lhs[entry[:expr_idx]][1], context, env)
+      result[key] = value
+    end
+
+    result
+  end
+
   # Evaluate name object against input data
   # @param {Object} expr - JSONata expression
   # @param {Object} input - Input data to evaluate against
@@ -289,6 +351,10 @@ class Jsonata
 
     if expr.keep_singleton_array
       raise "PANDA 3"
+    end
+
+    if expr.group.present?
+      result_sequence = evaluate_group_expression(expr.group, is_tuple_stream ? tuple_bindings : result_sequence, environment)
     end
 
     result_sequence
@@ -371,7 +437,7 @@ class Jsonata
         })
       end
     when "{"
-      raise "EVALUATE UNARY {"
+      result = evaluate_group_expression(expr, input, environment)
     end
 
     result
@@ -381,9 +447,13 @@ class Jsonata
   # @param {Object} enclosingEnvironment - Enclosing environment
   # @returns {{bind: bind, lookup: lookup}} Created frame
   class Frame
-    def initialize(enclosing_environment)
+    attr_accessor :is_parallel_call
+
+    def initialize(enclosing_environment = nil)
       @enclosing_environment = enclosing_environment
       @bindings = {}
+      @initialized_at = Time.now.utc
+      @is_parallel_call = false
     end
 
     def bind(name, value)
@@ -403,6 +473,14 @@ class Jsonata
 
     def global
       @enclosing_environment&.global || {"ancestry" => [nil]}
+    end
+
+    def now
+      @initialized_at.to_datetime.iso8601
+    end
+
+    def millis
+      (@initialized_at.to_f * 1000.0).to_i
     end
   end
 end
