@@ -4,16 +4,13 @@ require "./lib/jsonata_exception"
 class Utils
   class << self
     # TO-DO
-    def create_sequence(arg = [])
-      arg = if !arg.is_a?(Array)
-        [arg]
-      elsif arg.length == 1
-        [arg.first]
-      else
-        arg
+    def create_sequence(*args)
+      sequence = []
+      Utils.set(sequence, :sequence, true)
+      if args.length == 1
+        sequence << args[0]
       end
-      Utils.set(arg, :sequence, true)
-      arg
+      sequence
     end
 
     # TO-DO
@@ -53,7 +50,7 @@ class Utils
     # Returns true if the arg is an array of numbers
     # @param {*} arg - the item to test
     # @returns {boolean} True if arg is an array of numbers
-    def is_array_of_numbers(arg)
+    def is_array_of_numbers?(arg)
       return false unless arg.is_a?(Array)
       arg.all? { |item| is_numeric?(item) }
     end

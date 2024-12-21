@@ -27,7 +27,7 @@ class Jsonata
   # @param {Object} environment - Environment
   # @returns {*} Evaluated input data
   def evaluate(expr, input, environment)
-    # puts [""]
+    # puts ""
     # pp ["evaluate"]
     # pp ["type:", expr.type]
     # pp ["expr:", expr.to_h]
@@ -42,7 +42,9 @@ class Jsonata
       evaluate_unary(expr, input, environment);
     when "name"
       evaluate_name(expr, input, environment)
-    when "string", "number", "value"
+    when "number"
+      expr.value.to_f
+    when "string", "value"
       expr.value
     else
       "EVALUATE #{expr.type}"
@@ -68,6 +70,7 @@ class Jsonata
       end
     end
 
+    # pp ["result:", result]
     result 
   end
 
@@ -201,6 +204,10 @@ class Jsonata
   # @param {Object} environment - Environment
   # @returns {*} Result after a# pplying predicates
   def evaluate_filter(predicate, input, environment)
+    # puts ""
+    # pp ["evaluate_filter"]
+    # pp ["predicate", predicate.to_h]
+    # pp ["input", input]
     results = Utils.create_sequence
     if Utils.get(input, :tuple_stream)
       Utils.set(results, :tuple_stream, true)
@@ -217,7 +224,29 @@ class Jsonata
         end
       end
     else
-      raise "EVALUTE FILTER -- not number"
+      input.each.with_index do |item, idx|
+        context = item
+        env = environment
+        if Utils.get(input, :tuple_stream)
+          raise "evaluate_filter tuple stream"
+        end
+        res = evaluate(predicate, context, env)
+        res = [res] if Utils.is_numeric?(res)
+        if Utils.is_array_of_numbers?(res)
+          res.each do |ires|
+            ii = ires.floor
+            if ii < 0
+              # count in from end of array
+              ii = input.length + ii
+            end
+            if ii == idx
+              results.push(item)
+            end
+          end
+        elsif @fn.boolean(res) ## truthy
+          results.push(item)
+        end 
+      end
     end
 
     results
@@ -302,7 +331,7 @@ class Jsonata
   # @param {Object} environment - Environment
   # @returns {*} Evaluated input data
   def evaluate_path(expr, input, environment)
-    # puts [""]
+    # puts ""
     # pp ["evaluate_path"]
     # pp ["expr:", expr.to_h]
     # pp ["input:", input]
@@ -350,7 +379,12 @@ class Jsonata
     end
 
     if expr.keep_singleton_array
-      raise "PANDA 3"
+      # if the array is explicitly constructed in the expression and marked to promote singleton sequences to array
+      if result_sequence.is_a?(Array) && Utils.get(result_sequence, :cons).present? && Utils.get(result_sequence, :sequence).blank?
+        # result_sequence = Utils.create_sequence(result_sequence)
+        raise "evaluate_path keep_singleton_array result_sequence"
+      end
+      Utils.set(result_sequence, :keep_singleton, true)
     end
 
     if expr.group.present?
@@ -367,7 +401,7 @@ class Jsonata
   # @param {boolean} lastStep - flag the last step in a path
   # @returns {*} Evaluated input data
   def evaluate_step(expr, input, environment, last_step)
-    # puts [""]
+    # puts ""
     # pp ["evaluate_step"]
     # pp ["expr:", expr.to_h]
     # pp ["input:", input, Utils.get(input, :sequence), Utils.get(input, :outer_wrapper)]
@@ -381,7 +415,11 @@ class Jsonata
     input.each.with_index do |input_step, idx|
       res = evaluate(expr, input_step, environment)
 
-      # TO-DO
+      if expr.stages
+        expr.stages.each do |stage|
+          res = evaluate_filter(stage.expression, res, environment)
+        end
+      end
 
       result.push(res) if res.present?
     end

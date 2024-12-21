@@ -17,11 +17,11 @@ class Parser
 
     # parse the token
     expr = expression(0)
-
+    
     if @node.id != "(end)"
       raise "S0201"
     end
-
+    
     expr = process_ast(expr)
 
     if expr.type == "parent" || expr.seeking_parent.present?
@@ -203,6 +203,7 @@ class Parser
         if step.group.present?
           raise "S0209"
         end
+        
         predicate = process_ast(expr.rhs)
         if predicate.seeking_parent.present?
           raise "BINARY [ SEEKING PARENT"

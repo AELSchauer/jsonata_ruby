@@ -36,23 +36,23 @@ describe Utils do
     end
   end
 
-  describe ".is_array_of_numbers" do
+  describe ".is_array_of_numbers?" do
     it "returns false when arg isn't an array" do
-      expect(described_class.is_array_of_numbers("number")).to eq(false)
+      expect(described_class.is_array_of_numbers?("number")).to eq(false)
     end
 
     it "returns false when arg is array but not all elements are numbers" do
-      expect(described_class.is_array_of_numbers(["1", 2])).to eq(false)
-      expect(described_class.is_array_of_numbers([Float::NAN, 2])).to eq(false)
+      expect(described_class.is_array_of_numbers?(["1", 2])).to eq(false)
+      expect(described_class.is_array_of_numbers?([Float::NAN, 2])).to eq(false)
     end
 
     it "returns false when arg is array and all elements are numbers" do
-      expect(described_class.is_array_of_numbers([1, 2.0])).to eq(true)
+      expect(described_class.is_array_of_numbers?([1, 2.0])).to eq(true)
     end
 
     it "throws an error when arg is an array and any element is Infinity" do
-      # expect { described_class.is_array_of_numbers([Float::INFINITY]) }.to raise_error(JsonataException, /"code":"D1001"/)
-      expect { described_class.is_array_of_numbers([Float::INFINITY]) }.to raise_error("D1001")
+      # expect { described_class.is_array_of_numbers?([Float::INFINITY]) }.to raise_error(JsonataException, /"code":"D1001"/)
+      expect { described_class.is_array_of_numbers?([Float::INFINITY]) }.to raise_error("D1001")
     end
   end
 

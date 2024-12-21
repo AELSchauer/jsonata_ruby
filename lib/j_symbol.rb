@@ -1,7 +1,7 @@
 module JSymbol
   class Base
-    attr_reader :arguments, :focus, :group, :id, :keep_array, :keep_singleton, :level, :lhs, :procedure, :rhs, :sequence, :steps, :terms, :tuple_stream, :then_proc, :tuple
-    attr_accessor :consarray, :expression, :expressions, :group, :lbp, :lhs, :predicates, :position, :rhs, :stages, :type, :value
+    attr_reader :arguments, :focus, :group, :id, :keep_singleton, :level, :lhs, :procedure, :rhs, :sequence, :steps, :terms, :tuple_stream, :then_proc, :tuple
+    attr_accessor :consarray, :expression, :expressions, :group, :keep_array, :lbp, :lhs, :predicates, :position, :rhs, :stages, :type, :value
 
     attr_accessor :keep_singleton_array, :seeking_parent
 
@@ -31,7 +31,7 @@ module JSymbol
     end
 
     def to_h
-      map_vars = [:@consarray, :@expression, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value, :@group]
+      map_vars = [:@consarray, :@expression, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value, :@group, :@stages]
       map_vars.concat([:@expressions]) if @type == "unary"
       map_vars
         .reject { |key| instance_variable_get(key).nil? }
@@ -48,7 +48,13 @@ module JSymbol
       when "["
         if @context.node.id == "]"
           # empty predicate means maintain singleton arrays in the output
-          raise "INFIX EMPTY PREDICATE"
+          step = left
+          while step.present? && step.type == "binary" && step.value == "["
+            step = step.lhs
+          end
+          step.keep_array = true
+          @context.advance("]")
+          return left
         else
           @lhs = left;
           @rhs = @context.expression(Tokenizer::OPERATORS["]"]);
