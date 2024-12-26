@@ -1,3 +1,4 @@
+require "./lib/frame"
 require "./lib/functions"
 require "./lib/parser"
 require "./lib/utils"
@@ -7,15 +8,15 @@ class Jsonata
     @options = options
     @parser = Parser.new(expr)
     @fn = Functions.new(context: @parser)
-    @static_frame = Jsonata::Frame.new
-    @base_env = Jsonata::Frame.new(@static_frame)
+    @static_frame = Frame.new
+    @base_env = Frame.new(@static_frame)
   end
 
   def call(input, bindings = {})
     @expr = @parser.call
 
     # If the variable bindings have been passed in, create a frame to hold these
-    exec_env = bindings.blank? ? @base_env : Jsonata::Frame.new(@base_env, bindings)
+    exec_env = bindings.blank? ? @base_env : Frame.new(@base_env, bindings)
     exec_env.bind("$", input)
 
     # if the input is a JSON array, then wrap it in a singleton sequence so it gets treated as a single input
@@ -518,46 +519,6 @@ class Jsonata
       end
     else
       results.push(input)
-    end
-  end
-
-  # Create frame
-  # @param {Object} enclosingEnvironment - Enclosing environment
-  # @returns {{bind: bind, lookup: lookup}} Created frame
-  class Frame
-    attr_accessor :is_parallel_call
-    attr_writer :bindings
-
-    def initialize(enclosing_environment = nil, bindings = {})
-      @enclosing_environment = enclosing_environment
-      @bindings = bindings
-      @initialized_at = Time.now.utc
-      @is_parallel_call = false
-    end
-
-    def bind(name, value)
-      return nil if name == ""
-      @bindings[name] = value
-    end
-
-    def lookup(name)
-      @bindings[name] || @enclosing_environment.lookup(name)
-    end
-
-    def timestamp
-      @enclosing_environment&.timestamp || nil
-    end
-
-    def global
-      @enclosing_environment&.global || {"ancestry" => [nil]}
-    end
-
-    def now
-      @initialized_at.to_datetime.iso8601
-    end
-
-    def millis
-      (@initialized_at.to_f * 1000.0).to_i
     end
   end
 end
