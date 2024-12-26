@@ -3,7 +3,7 @@ require "./lib/jsonata_exception"
 
 class Utils
   class << self
-    # TO-DO
+    # TO-DO Comments
     def create_sequence(*args)
       sequence = []
       Utils.set(sequence, :sequence, true)
@@ -13,12 +13,12 @@ class Utils
       sequence
     end
 
-    # TO-DO
+    # TO-DO Comments
     def get(obj, key)
       obj.instance_variable_get("@#{key}")
     end
 
-    # TO-DO
+    # TO-DO Comments
     def set(obj, key, val)
       obj.instance_variable_set("@#{key}", val)
       obj

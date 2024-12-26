@@ -61,6 +61,9 @@ class Parser
     symbol("and") # Boolean AND
     symbol("or") # Boolean OR
 
+    # Prefix Only
+    symbol("**")
+
     # Infix and Prefix
     symbol("[") # array constructor & filter - predicate or array index
     symbol("{") # object constructor & object grouping
@@ -103,7 +106,7 @@ class Parser
     # when "regex"
       #
     else
-      puts "TO-DO ADVANCE"
+      # puts "ADVANCE"
     end
 
     @node = sym.dup

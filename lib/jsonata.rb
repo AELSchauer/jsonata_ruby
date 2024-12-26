@@ -18,7 +18,7 @@ class Jsonata
       @input = Utils.create_sequence(@input)
       Utils.set(@input, :outer_wrapper, true)
     end
-    evaluate(@expr, @input, @environment) # TO-DO
+    evaluate(@expr, @input, @environment)
   end
 
   # Evaluate expression against input data
@@ -28,10 +28,10 @@ class Jsonata
   # @returns {*} Evaluated input data
   def evaluate(expr, input, environment)
     # puts ""
-    # pp ["evaluate"]
-    # pp ["type:", expr.type]
-    # pp ["expr:", expr.to_h]
-    # pp ["input:", input]
+    # puts ["evaluate"]
+    # pp ["type", expr.type]
+    # pp ["expr", expr.to_h]
+    # pp ["input", input]
 
     result = case expr.type
     when "path"
@@ -46,8 +46,10 @@ class Jsonata
       expr.value.to_f
     when "string", "value"
       expr.value
+    when "descendant"
+      evaluate_descendants(expr, input);
     else
-      "EVALUATE #{expr.type}"
+      raise "EVALUATE -- #{expr.type}"
     end
 
     if expr.predicates.present?
@@ -156,6 +158,19 @@ class Jsonata
     when ">="
       lhs >= rhs
     end
+  end
+
+  # Evaluate descendants against input data
+  # @param {Object} expr - JSONata expression
+  # @param {Object} input - Input data to evaluate against
+  # @returns {*} Evaluated input data
+  def evaluate_descendants(expr, input)
+    result_sequence = Utils.create_sequence
+    return nil if input.nil?
+      
+    # traverse all descendants of this object/array
+    recurse_descendents(input, result_sequence)
+    result_sequence.length == 1 ? result_sequence[0] : result_sequence
   end
 
   # Evaluate equality expression against input data
@@ -319,7 +334,7 @@ class Jsonata
   # @returns {*} Evaluated input data
   def evaluate_name(expr, input, environment)
     # puts [""]
-    # pp ["evaluate_name"]
+    # pp ["evaluateName"]
     # pp ["expr:", expr.to_h]
     # pp ["input:", input]
     @fn.lookup(input, expr.value)
@@ -332,9 +347,9 @@ class Jsonata
   # @returns {*} Evaluated input data
   def evaluate_path(expr, input, environment)
     # puts ""
-    # pp ["evaluate_path"]
-    # pp ["expr:", expr.to_h]
-    # pp ["input:", input]
+    # pp ["evaluatePath"]
+    # pp ["expr", expr.to_h]
+    # pp ["input", input]
     # expr is an array of steps
     # if the first step is a variable reference ($...), including root reference ($$),
     #   then the path is absolute rather than relative
@@ -355,14 +370,11 @@ class Jsonata
       # if the first step is an explicit array constructor, then just evaluate that (i.e. don't iterate over a context array)
       if idx == 0 && step.consarray
         result_sequence = evaluate(step, input_sequence, environment)
+      elsif is_tuple_stream
+        raise "EVALUATE -- EACH STEP -- IS TUPLE STREAM"
+        # tupleBindings = await evaluateTupleStep(step, inputSequence, tupleBindings, environment);
       else
-        if is_tuple_stream
-          # TO-DO
-          raise "PANDA IS TUPLE STREAM"
-        else
-          # TO-DO
-          result_sequence = evaluate_step(step, input_sequence, environment, idx == expr.steps.count - 1)
-        end
+        result_sequence = evaluate_step(step, input_sequence, environment, idx == expr.steps.count - 1)
       end
 
       if !is_tuple_stream && (result_sequence.nil? || result_sequence.empty?)
@@ -375,7 +387,7 @@ class Jsonata
     end
 
     if is_tuple_stream
-      raise "PANDA 2"
+      raise "EVALUATE -- IS TUPLE STREAM"
     end
 
     if expr.keep_singleton_array
@@ -402,10 +414,10 @@ class Jsonata
   # @returns {*} Evaluated input data
   def evaluate_step(expr, input, environment, last_step)
     # puts ""
-    # pp ["evaluate_step"]
-    # pp ["expr:", expr.to_h]
-    # pp ["input:", input, Utils.get(input, :sequence), Utils.get(input, :outer_wrapper)]
-    # pp ["last_step:", last_step]
+    # pp ["evaluateStep"]
+    # pp ["expr", expr.to_h]
+    # pp ["input", input, Utils.get(input, :sequence), Utils.get(input, :outer_wrapper)]
+    # pp ["last_step", last_step]
     if expr.type == "sort"
       raise "EVALUATE STEP SORT"
     end
@@ -479,6 +491,25 @@ class Jsonata
     end
 
     result
+  end
+
+  # Recurse through descendants
+  # @param {Object} input - Input data
+  # @param {Object} results - Results
+  def recurse_descendents(input, results)
+    # this is the equivalent of //* in XPath
+    if input.is_a?(Array)
+      input.each do |member|
+        recurse_descendents(member, results)
+      end
+    elsif input.is_a?(Hash)
+      results.push(input)
+      input.each do |ele|
+        recurse_descendents(ele, results)
+      end
+    else
+      results.push(input)
+    end
   end
 
   # Create frame

@@ -77,6 +77,8 @@ module JSymbol
 
     def nud
       case @value
+      when "**"
+        @type = "descendant";
       when "["
         arr = []
         if @context.node.id != "]"

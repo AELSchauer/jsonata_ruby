@@ -3,7 +3,7 @@ require "./spec/features/spec_helper"
 require "json"
 
 # These are test cases copied over from the source JS repo
-describe "Descendent Operators" do
+describe "Descendent Operator" do
   it "case000" do
     jsonata = build_jsonata(
       expr: "foo.**.blah",
