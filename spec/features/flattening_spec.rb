@@ -1,4 +1,5 @@
 require "./lib/jsonata"
+require "./spec/features/spec_helper"
 require "json"
 
 # These are test cases copied over from the source JS repo
@@ -21,27 +22,26 @@ describe "Flattening" do
     ])
   end
 
-  it "case001" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$.nest0",
-    #   data: [
-    #     {
-    #         "nest0": [
-    #             1,
-    #             2
-    #         ]
-    #     },
-    #     {
-    #         "nest0": [
-    #             3,
-    #             4
-    #         ]
-    #     }
-    # ]
-    # )
+  xit "case001" do
+    jsonata = build_jsonata(
+      expr: "$.nest0",
+      data: [
+        {
+            "nest0": [
+                1,
+                2
+            ]
+        },
+        {
+            "nest0": [
+                3,
+                4
+            ]
+        }
+    ]
+    )
 
-    # expect(jsonata.call).to eq([1, 2, 3, 4])
+    expect(jsonata.call).to eq([1, 2, 3, 4])
   end
 
   it "case002" do
@@ -66,163 +66,121 @@ describe "Flattening" do
     expect(jsonata.call).to eq([1, 2, 3, 4])
   end
 
-  it "case003" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$[0]",
-    #   data: [
-    #     {
-    #         "nest0": [
-    #             1,
-    #             2
-    #         ]
-    #     },
-    #     {
-    #         "nest0": [
-    #             3,
-    #             4
-    #         ]
-    #     }
-    #   ]
-    # )
+  xit "case003" do
+    jsonata = build_jsonata(
+      expr: "$[0]",
+      data: [
+        {
+            "nest0": [
+                1,
+                2
+            ]
+        },
+        {
+            "nest0": [
+                3,
+                4
+            ]
+        }
+      ]
+    )
 
-    # expect(jsonata.call).to eq({
-    #   "nest0" => [
-    #       1,
-    #       2
-    #   ]
-    # })
+    expect(jsonata.call).to eq({
+      "nest0" => [
+          1,
+          2
+      ]
+    })
   end
 
-  it "case004" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$[1]",
-    #   data: [
-    #     {
-    #         "nest0": [
-    #             1,
-    #             2
-    #         ]
-    #     },
-    #     {
-    #         "nest0": [
-    #             3,
-    #             4
-    #         ]
-    #     }
-    #   ]
-    # )
+  xit "case004" do
+    jsonata = build_jsonata(
+      expr: "$[1]",
+      data: [
+        {
+          "nest0": [
+            1,
+            2
+          ]
+        },
+        {
+          "nest0": [
+            3,
+            4
+          ]
+        }
+      ]
+    )
 
-    # expect(jsonata.call).to eq({
-    #   "nest0" => [
-    #       3,
-    #       4
-    #   ]
-    # })
+    expect(jsonata.call).to eq({
+      "nest0" => [3,4]
+    })
   end
 
-  it "case005" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$[-1]",
-    #   data: [
-    #     {
-    #         "nest0": [
-    #             1,
-    #             2
-    #         ]
-    #     },
-    #     {
-    #         "nest0": [
-    #             3,
-    #             4
-    #         ]
-    #     }
-    #   ]
-    # )
+  xit "case005" do
+    jsonata = build_jsonata(
+      expr: "$[-1]",
+      data: [
+        {
+          "nest0": [1,2]
+        },
+        {
+          "nest0": [3,4]
+        }
+      ]
+    )
 
-    # expect(jsonata.call).to eq({
-    #   "nest0" => [
-    #       3,
-    #       4
-    #   ]
-    # })
+    expect(jsonata.call).to eq({
+      "nest0" => [3,4]
+    })
   end
 
-  it "case006" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$[0].nest0",
-    #   data: [
-    #     {
-    #         "nest0": [
-    #             1,
-    #             2
-    #         ]
-    #     },
-    #     {
-    #         "nest0": [
-    #             3,
-    #             4
-    #         ]
-    #     }
-    #   ]
-    # )
+  xit "case006" do
+    jsonata = build_jsonata(
+      expr: "$[0].nest0",
+      data: [
+        {
+          "nest0": [1,2]
+        },
+        {
+          "nest0": [3,4]
+        }
+      ]
+    )
 
-    # expect(jsonata.call).to eq([
-    #     1,
-    #     2
-    # ])
+    expect(jsonata.call).to eq([1,2])
   end
 
-  it "case007" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$[1].nest0",
-    #   data: [
-    #     {
-    #         "nest0": [
-    #             1,
-    #             2
-    #         ]
-    #     },
-    #     {
-    #         "nest0": [
-    #             3,
-    #             4
-    #         ]
-    #     }
-    #   ]
-    # )
+  xit "case007" do
+    jsonata = build_jsonata(
+      expr: "$[1].nest0",
+      data: [
+        {
+          "nest0": [ 1, 2 ]
+        },
+        {
+          "nest0": [3,4]
+        }
+      ]
+    )
 
-    # expect(jsonata.call).to eq([
-    #     3,
-    #     4
-    # ])
+    expect(jsonata.call).to eq([3,4])
   end
 
-  it "case008" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$[0].nest0[0]",
-    #   data: [
-    #     {
-    #         "nest0": [
-    #             1,
-    #             2
-    #         ]
-    #     },
-    #     {
-    #         "nest0": [
-    #             3,
-    #             4
-    #         ]
-    #     }
-    #   ]
-    # )
+  xit "case008" do
+    jsonata = build_jsonata(
+      expr: "$[0].nest0[0]",
+      data: [
+        {
+          "nest0": [1,2]
+        },
+        {
+          "nest0": [3,4]
+        }
+      ]
+    )
 
-    # expect(jsonata.call).to eq(1)
+    expect(jsonata.call).to eq(1)
   end
 
   it "case009" do
@@ -552,27 +510,26 @@ describe "Flattening" do
     expect(jsonata.call).to eq([1])
   end
 
-  it "case034a" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$.a[0].b",
-    #   data: [
-    #     {
-    #       "a" => [
-    #         {"b" => [1]},
-    #         {"b" => [2]}
-    #       ]
-    #     },
-    #     {
-    #       "a" => [
-    #         {"b" => [3]},
-    #         {"b" => [4]}
-    #       ]
-    #     }
-    #   ]
-    # )
+  xit "case034a" do
+    jsonata = build_jsonata(
+      expr: "$.a[0].b",
+      data: [
+        {
+          "a" => [
+            {"b" => [1]},
+            {"b" => [2]}
+          ]
+        },
+        {
+          "a" => [
+            {"b" => [3]},
+            {"b" => [4]}
+          ]
+        }
+      ]
+    )
 
-    # expect(jsonata.call).to eq([1])
+    expect(jsonata.call).to eq([1])
   end
 
   it "case035" do
@@ -672,59 +629,46 @@ describe "Flattening" do
     })
   end
 
-  it "case042" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$[type='command'][]",
-    #   data: [{"type":"command"},{"type":"commands"}]
-    # )
+  xit "case042" do
+    jsonata = build_jsonata(
+      expr: "$[type='command'][]",
+      data: [{"type":"command"},{"type":"commands"}]
+    )
 
-    # expect(jsonata.call).to eq([{"type":"command"}])
+    expect(jsonata.call).to eq([{"type":"command"}])
   end
 
-  it "case043" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$[][type='command']",
-    #   data: [{"type":"command"},{"type":"commands"}]
-    # )
+  xit "case043" do
+    jsonata = build_jsonata(
+      expr: "$[][type='command']",
+      data: [{"type":"command"},{"type":"commands"}]
+    )
 
-    # expect(jsonata.call).to eq([{"type":"command"}])
+    expect(jsonata.call).to eq([{"type":"command"}])
   end
 
-  it "case044" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$filter($, function($e) { $e != 0 })[]",
-    #   data: [0,0,5,0]
-    # )
+  xit "case044" do
+    jsonata = build_jsonata(
+      expr: "$filter($, function($e) { $e != 0 })[]",
+      data: [0,0,5,0]
+    )
 
-    # expect(jsonata.call).to eq([5])
+    expect(jsonata.call).to eq([5])
   end
 
-  it "case045" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$.tags[title='example'][]",
-    #   data: {
-    #     "tags": [
-    #       {
-    #         "title": "example",
-    #         "description": "Hello"
-    #       }
-    #     ]
-    #   }
-    # )
+  xit "case045" do
+    jsonata = build_jsonata(
+      expr: "$.tags[title='example'][]",
+      data: {
+        "tags": [
+          {
+            "title": "example",
+            "description": "Hello"
+          }
+        ]
+      }
+    )
 
-    # expect(jsonata.call).to eq([5])
-  end
-
-  # Helper setup functions
-  def build_jsonata(expr:, dataset: nil, data: "")
-    if dataset.present?
-      Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
-    else
-      Jsonata.new(expr, data)
-    end
+    expect(jsonata.call).to eq([5])
   end
 end

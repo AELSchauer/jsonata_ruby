@@ -1,4 +1,5 @@
 require "./lib/jsonata"
+require "./spec/features/spec_helper"
 require "json"
 
 # These are test cases copied over from the source JS repo
@@ -27,13 +28,12 @@ describe "Null" do
     expect(jsonata.call).to eq([])
   end
 
-  it "case003" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "$not(null)"
-    # )
+  xit "case003" do
+    jsonata = build_jsonata(
+      expr: "$not(null)"
+    )
 
-    # expect(jsonata.call).to eq([])
+    expect(jsonata.call).to eq([])
   end
 
   it "case004" do
@@ -62,14 +62,5 @@ describe "Null" do
       "false" => false,
       "null" => nil
     })
-  end
-
-  # Helper setup functions
-  def build_jsonata(expr:, dataset: nil, data: "")
-    if dataset.present?
-      Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
-    else
-      Jsonata.new(expr, data)
-    end
   end
 end

@@ -674,6 +674,64 @@ describe Parser do
     end
   end
 
+  describe "descendent operators" do
+    it "returns the expected expression and processed steps" do
+      ## Setup
+      parser = Parser.new("foo.**.blah")
+      parser.setup
+
+      ## Test      
+      expr = parser.expression(0)
+      expect(expr.to_h).to match({
+        "value" => ".",
+        "type" => "binary",
+        "position" => 7,
+        "lhs" => {
+          "value" => ".",
+          "type" => "binary",
+          "position" => 4,
+          "lhs" => {
+            "value" => "foo",
+            "type" => "name",
+            "position" => 3
+          },
+          "rhs" => {
+            "value" => "**",
+            "type" => "descendant",
+            "position" => 6
+          }
+        },
+        "rhs" => {
+          "value" => "blah",
+          "type" => "name",
+          "position" => 11
+        }
+      })
+
+      expr = parser.process_ast(expr)
+      expect(expr.to_h).to match({
+        "type" => "path",
+        "steps" => [
+          {
+            "value" => "foo",
+            "type" => "name",
+            "position" => 3
+          },
+          {
+            "value" => "**",
+            "type" => "descendant",
+            "position" => 6
+          },
+          {
+            "value" => "blah",
+            "type" => "name",
+            "position" => 11
+          }
+        ]
+      })
+    end
+  end
+
   describe "fields" do
     describe "foo" do
       it "returns the expected expression and processed steps" do

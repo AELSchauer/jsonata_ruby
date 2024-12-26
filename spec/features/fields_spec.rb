@@ -1,4 +1,5 @@
 require "./lib/jsonata"
+require "./spec/features/spec_helper"
 require "json"
 
 # These are test cases copied over from the source JS repo
@@ -100,10 +101,5 @@ describe "Fields" do
       "hello",
       "world"
     ])
-  end
-
-  # Helper setup functions
-  def build_jsonata(expr:, dataset:)
-    Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
   end
 end

@@ -1,4 +1,5 @@
 require "./lib/jsonata"
+require "./spec/features/spec_helper"
 require "json"
 
 # These are test cases copied over from the source JS repo
@@ -111,30 +112,32 @@ describe "Numeric Operators" do
     expect(jsonata.call).to eq(4214)
   end
 
-  it "case012" do
-    # jsonata = build_jsonata(
-    #   expr: "24 * notexist",
-    #   dataset: "dataset0"
-    # )
+  xit "case012" do
+    # Undefined result
+    jsonata = build_jsonata(
+      expr: "24 * notexist",
+      dataset: "dataset0"
+    )
 
-    # expect(jsonata.call).to eq(4214)
+    expect(jsonata.call).to eq(4214)
   end
 
-  it "case013" do
-    # jsonata = build_jsonata(
-    #   expr: "notexist + 1",
-    #   dataset: "dataset0"
-    # )
+  xit "case013" do
+    # Undefined result
+    jsonata = build_jsonata(
+      expr: "notexist + 1",
+      dataset: "dataset0"
+    )
 
-    # expect(jsonata.call).to eq(4214)
+    expect(jsonata.call).to eq(nil)
   end
   
-  it "case014" do
-    # jsonata = build_jsonata(
-    #   expr: "1/(10e300 * 10e100) "
-    # )
+  xit "case014" do
+    jsonata = build_jsonata(
+      expr: "1/(10e300 * 10e100) "
+    )
     
-    # expect { jsonata.call }.to raise_error("D1001")
+    expect { jsonata.call }.to raise_error("D1001")
   end
 
   it "case015" do
@@ -145,13 +148,13 @@ describe "Numeric Operators" do
     expect { jsonata.call }.to raise_error("T2001")
   end
 
-  it "case016" do
-    # jsonata = build_jsonata(
-    #   expr: "- notexist",
-    #   dataset: "dataset0"
-    # )
+  xit "case016" do
+    jsonata = build_jsonata(
+      expr: "- notexist",
+      dataset: "dataset0"
+    )
 
-    # expect(jsonata.call).to eq("T2001")
+    expect { jsonata.call }.to raise_error("T2001")
   end
 
   it "case017" do
@@ -163,21 +166,12 @@ describe "Numeric Operators" do
     expect { jsonata.call }.to raise_error("T2001")
   end
 
-  it "case018" do
-    # jsonata = build_jsonata(
-    #   expr: "false + $x",
-    #   dataset: "dataset0"
-    # )
+  xit "case018" do
+    jsonata = build_jsonata(
+      expr: "false + $x",
+      dataset: "dataset0"
+    )
 
-    # expect { jsonata.call }.to raise_error("T2001")
-  end
-
-  # Helper setup functions
-  def build_jsonata(expr:, dataset: nil, data: "")
-    if dataset.present?
-      Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
-    else
-      Jsonata.new(expr, data)
-    end
+    expect { jsonata.call }.to raise_error("T2001")
   end
 end

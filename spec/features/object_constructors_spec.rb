@@ -1,4 +1,5 @@
 require "./lib/jsonata"
+require "./spec/features/spec_helper"
 require "json"
 
 # These are test cases copied over from the source JS repo
@@ -63,13 +64,12 @@ describe "Object Constructors" do
     })
   end
 
-  it "case006" do
-    # TO-DO
-    # jsonata = build_jsonata(
-    #   expr: "{\"test\": ()}"
-    # )
+  xit "case006" do
+    jsonata = build_jsonata(
+      expr: "{\"test\": ()}"
+    )
 
-    # expect(jsonata.call).to eq({})
+    expect(jsonata.call).to eq({})
   end
 
   it "case007" do
@@ -119,14 +119,5 @@ describe "Object Constructors" do
           ]
       }
     ])
-  end
-
-  # Helper setup functions
-  def build_jsonata(expr:, dataset: nil, data: "")
-    if dataset.present?
-      Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
-    else
-      Jsonata.new(expr, data)
-    end
   end
 end

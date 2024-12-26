@@ -1,4 +1,5 @@
 require "./lib/jsonata"
+require "./spec/features/spec_helper"
 require "json"
 
 # These are test cases copied over from the source JS repo
@@ -83,118 +84,202 @@ describe "Boolean Expressions" do
     expect(jsonata.call).to eq(true)
   end
 
-  it "case010" do
-    ###
-  end
-
-  it "case011" do
-    ###
-  end
-
-  it "case012" do
-    ###
-  end
-
-  it "case013" do
-    ###
-  end
-
-  it "case014" do
-    ###
-  end
-
-  it "case015" do
-    jsonata = Jsonata.new("and and and", {"and" => 1, "or" => 2})
+  xit "case010" do
+    jsonata = build_jsonata(
+      expr: "$not(false)",
+      dataset: "dataset0"
+    )
 
     expect(jsonata.call).to eq(true)
   end
 
-  it "case016" do
-    ###
+  xit "case011" do
+    jsonata = build_jsonata(
+      expr: "$not(true)",
+      dataset: "dataset0"
+    )
+
+    expect(jsonata.call).to eq(false)
+  end
+
+  it "case012" do
+    jsonata = build_jsonata(
+      expr: "and=1 and or=2",
+      data: {"and" => 1, "or" => 2}
+    )
+
+    expect(jsonata.call).to eq(true)
+  end
+
+  xit "case013" do
+    jsonata = build_jsonata(
+      expr: "and>1 or or!=2",
+      data: {"and" => 1, "or" => 2}
+    )
+
+    expect(jsonata.call).to eq(true)
+  end
+
+  xit "case014" do
+    jsonata = build_jsonata(
+      expr: "and>1 or or!=2",
+      data: {"and" => 1, "or" => 2}
+    )
+
+    expect(jsonata.call).to eq(false)
+  end
+
+  it "case015" do
+    jsonata = build_jsonata(
+      expr: "and and and",
+      data: {"and" => 1, "or" => 2}
+    )
+
+    expect(jsonata.call).to eq(true)
+  end
+
+  xit "case016" do
+    jsonata = build_jsonata(
+      expr: "$[].content.origin.$lowercase(name)",
+      dataset: "dataset11"
+    )
+
+    expect(jsonata.call).to eq("fakeintegrationname")
   end
 
   it "case017" do
-    jsonata = Jsonata.new("true or foo", "null")
+    jsonata = build_jsonata(
+      expr: "true or foo",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(true)
   end
 
   it "case018" do
-    jsonata = Jsonata.new("foo or true", "null")
+    jsonata = build_jsonata(
+      expr: "foo or true",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(true)
   end
 
   it "case019" do
-    jsonata = Jsonata.new("false or foo", "null")
+    jsonata = build_jsonata(
+      expr: "false or foo",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(false)
   end
 
   it "case020" do
-    jsonata = Jsonata.new("foo or false", "null")
+    jsonata = build_jsonata(
+      expr: "foo or false",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(false)
   end
 
   it "case021" do
-    jsonata = Jsonata.new("foo or bar", "null")
+    jsonata = build_jsonata(
+      expr: "foo or bar",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(false)
   end
 
   it "case022" do
-    jsonata = Jsonata.new("true and foo", "null")
+    jsonata = build_jsonata(
+      expr: "true and foo",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(false)
   end
 
   it "case023" do
-    jsonata = Jsonata.new("foo and true", "null")
+    jsonata = build_jsonata(
+      expr: "foo and true",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(false)
   end
 
   it "case024" do
-    jsonata = Jsonata.new("false and foo", "null")
+    jsonata = build_jsonata(
+      expr: "false and foo",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(false)
   end
 
   it "case025" do
-    jsonata = Jsonata.new("foo and false", "null")
+    jsonata = build_jsonata(
+      expr: "foo and false",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(false)
   end
 
   it "case026" do
-    jsonata = Jsonata.new("foo and bar", "null")
+    jsonata = build_jsonata(
+      expr: "foo and bar",
+      data: "null"
+    )
 
     expect(jsonata.call).to eq(false)
   end
 
-  it "case027" do
-    ###
+  xit "case027" do
+    # Undefined result
+    jsonata = build_jsonata(
+      expr: "foo and bar",
+      data: "null"
+    )
+
+    expect(jsonata.call).to eq(nil)
   end
 
-  it "case028" do
-    ###
+  xit "case028" do
+    # Will not evaluate rhs (which would error) because lhs is true
+    jsonata = build_jsonata(
+      expr: "foo = '' or $number(foo) = 0",
+      data: {
+        "foo" => ""
+      }
+    )
+
+    expect(jsonata.call).to eq(nil)
   end
 
-  it "case029" do
-    ###
+  xit "case029" do
+    # Will not evaluate rhs (which would error) because lhs is false
+    jsonata = build_jsonata(
+      expr: "$type(data) = 'number' and data > 10",
+      data: {
+        "data" => "15"
+      }
+    )
+
+    expect(jsonata.call).to eq(false)
   end
 
-  it "case030" do
-    ###
-  end
+  xit "case030" do
+    # Throws error on right side of boolean expression (for CC of a catch)
+    jsonata = build_jsonata(
+      expr: "$type(data) = 'number' and data > 10",
+      data: {
+        "age" => "33 1/2"
+      }
+    )
 
-  # Helper setup functions
-  def build_jsonata(expr:, dataset: nil)
-    if dataset.present?
-      Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
-    else
-      Jsonata.new(expr, "")
-    end
+    expect { jsonata.call }.to raise_error("D3030")
   end
 end

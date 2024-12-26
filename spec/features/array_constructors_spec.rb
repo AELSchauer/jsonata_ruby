@@ -1,4 +1,5 @@
 require "./lib/jsonata"
+require "./spec/features/spec_helper"
 require "json"
 
 # These are test cases copied over from the source JS repo
@@ -51,8 +52,22 @@ describe "Array Constructors" do
     expect(jsonata.call).to eq([1, "two", ["three", 4]])
   end
 
-  it "case006" do
-    ##
+  xit "case006" do
+    # TO-DO Bindings
+    # "expr": "[1, $two, [\"three\", $four]]",
+    # "dataset": "dataset5",
+    # "bindings": {
+    #     "two": 2,
+    #     "four": "four"
+    # },
+    # "result": [
+    #     1,
+    #     2,
+    #     [
+    #         "three",
+    #         "four"
+    #     ]
+    # ]
   end
 
   it "case007" do
@@ -173,60 +188,51 @@ describe "Array Constructors" do
     ])
   end
 
-  it "case016" do
-    # jsonata = build_jsonata(
-    #   expr: "[Address, Other.`Alternative.Address`].City",
-    #   dataset: "dataset1"
-    # )
+  xit "case016" do
+    jsonata = build_jsonata(
+      expr: "[Address, Other.`Alternative.Address`].City",
+      dataset: "dataset1"
+    )
 
-    # expect(jsonata.call).to eq([
-    #   "Winchester",
-    #   "London"
-    # ])
+    expect(jsonata.call).to eq([
+      "Winchester",
+      "London"
+    ])
   end
 
-  it "case017" do
-    # jsonata = build_jsonata(
-    #   expr: "[0,1,2,3,4,5,6,7,8,9][$ % 2 = 0]",
-    #   data: nil
-    # )
+  xit "case017" do
+    jsonata = build_jsonata(
+      expr: "[0,1,2,3,4,5,6,7,8,9][$ % 2 = 0]",
+      data: nil
+    )
 
-    # expect(jsonata.call).to eq([0,2,4,6,8])
+    expect(jsonata.call).to eq([0,2,4,6,8])
   end
 
-  it "case018" do
-    # jsonata = build_jsonata(
-    #   expr: "[1, 2, 3].$",
-    #   data: nil
-    # )
+  xit "case018" do
+    jsonata = build_jsonata(
+      expr: "[1, 2, 3].$",
+      data: nil
+    )
 
-    # expect(jsonata.call).to eq([1,2,3)
+    expect(jsonata.call).to eq([1,2,3])
   end
 
-  it "case019" do
-    # jsonata = build_jsonata(
-    #   expr: "[1, 2, 3].$",
-    #   data: []
-    # )
+  xit "case019" do
+    jsonata = build_jsonata(
+      expr: "[1, 2, 3].$",
+      data: []
+    )
 
-    # expect(jsonata.call).to eq([1,2,3)
+    expect(jsonata.call).to eq([1,2,3])
   end
 
-  it "case020" do
-    # jsonata = build_jsonata(
-    #   expr: "[1, 2, 3].$",
-    #   data: [4,5,6]
-    # )
+  xit "case020" do
+    jsonata = build_jsonata(
+      expr: "[1, 2, 3].$",
+      data: [4,5,6]
+    )
 
-    # expect(jsonata.call).to eq([1,2,3)
-  end
-
-  # Helper setup functions
-  def build_jsonata(expr:, dataset: nil, data: "")
-    if dataset.present?
-      Jsonata.new(expr, JSON.parse(File.read("./spec/fixtures/#{dataset}.json")))
-    else
-      Jsonata.new(expr, data)
-    end
+    expect(jsonata.call).to eq([1,2,3])
   end
 end
