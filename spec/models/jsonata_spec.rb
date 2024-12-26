@@ -7,70 +7,94 @@ describe Jsonata do
     describe "foo" do
       it "returns the expected string" do
         ## Setup
-        jsonata = Jsonata.new("foo", {"foo" => "bar"})
+        jsonata, input = build_jsonata(
+          expr: "foo",
+          data: {"foo" => "bar"}
+        )
         
         ## Test      
-        expect(jsonata.call).to match("bar")
+        expect(jsonata.call(input)).to match("bar")
       end
 
       it "returns the expected integer" do
         ## Setup
-        jsonata = Jsonata.new("foo", {"foo" => 42})
+        jsonata, input = build_jsonata(
+          expr: "foo",
+          data: {"foo" => 42}
+        )
         
         ## Test      
-        expect(jsonata.call).to match(42)
+        expect(jsonata.call(input)).to match(42)
       end
 
       it "returns the expected array" do
         ## Setup
-        jsonata = Jsonata.new("foo", {"foo" => [4, 8, 15, 16, 23, 42]})
+        jsonata, input = build_jsonata(
+          expr: "foo",
+          data: {"foo" => [4, 8, 15, 16, 23, 42]}
+        )
         
         ## Test      
-        expect(jsonata.call).to match([4, 8, 15, 16, 23, 42])
+        expect(jsonata.call(input)).to match([4, 8, 15, 16, 23, 42])
       end
 
       it "returns the expected hash" do
         ## Setup
-        jsonata = Jsonata.new("foo", {"foo" => {"bar" => "baz"}})
+        jsonata, input = build_jsonata(
+          expr: "foo",
+          data: {"foo" => {"bar" => "baz"}}
+        )
         
         ## Test      
-        expect(jsonata.call).to match({"bar" => "baz"})
+        expect(jsonata.call(input)).to match({"bar" => "baz"})
       end
     end
 
     describe "foo.bar" do
       it "returns the expected string" do
         ## Setup
-        jsonata = Jsonata.new("foo.bar", {"foo" => {"bar" => "bazz"}})
+        jsonata, input = build_jsonata(
+          expr: "foo.bar",
+          data: {"foo" => {"bar" => "bazz"}}
+        )
         
         ## Test      
-        expect(jsonata.call).to match("bazz")
+        expect(jsonata.call(input)).to match("bazz")
       end
 
       it "returns the expected array of hashes" do
         ## Setup
-        jsonata = Jsonata.new("foo.bar", {"foo" => {"bar" => [{"bazz" => "hello"}, {"bazz" => "world"}]}})
+        jsonata, input = build_jsonata(
+          expr: "foo.bar",
+          data: {"foo" => {"bar" => [{"bazz" => "hello"}, {"bazz" => "world"}]}}
+        )
         
         ## Test      
-        expect(jsonata.call).to match([{"bazz" => "hello"}, {"bazz" => "world"}])
+        expect(jsonata.call(input)).to match([{"bazz" => "hello"}, {"bazz" => "world"}])
       end
     end
 
     describe "foo.bar.bazz" do
       it "returns the expected string" do
         ## Setup
-        jsonata = Jsonata.new("foo.bar.bazz", {"foo" => {"bar" => {"bazz" => "hello"}}})
+        jsonata, input = build_jsonata(
+          expr: "foo.bar.bazz",
+          data: {"foo" => {"bar" => {"bazz" => "hello"}}}
+        )
         
         ## Test      
-        expect(jsonata.call).to match("hello")
+        expect(jsonata.call(input)).to match("hello")
       end
 
       it "returns the expected array of strings" do
         ## Setup
-        jsonata = Jsonata.new("foo.bar.bazz", {"foo" => {"bar" => [{"bazz" => "hello"}, {"bazz" => "world"}]}})
+        jsonata, input = build_jsonata(
+          expr: "foo.bar.bazz",
+          data: {"foo" => {"bar" => [{"bazz" => "hello"}, {"bazz" => "world"}]}}
+        )
         
         ## Test      
-        expect(jsonata.call).to match(["hello", "world"])
+        expect(jsonata.call(input)).to match(["hello", "world"])
       end
     end
   end

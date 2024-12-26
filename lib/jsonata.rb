@@ -3,22 +3,31 @@ require "./lib/parser"
 require "./lib/utils"
 
 class Jsonata
-  def initialize(expr, input, options = {})
-    @input = input
+  def initialize(expr, options = {})
     @options = options
     @parser = Parser.new(expr)
     @fn = Functions.new(context: @parser)
     @static_frame = Jsonata::Frame.new
-    @environment = Jsonata::Frame.new(@static_frame)
+    @base_env = Jsonata::Frame.new(@static_frame)
   end
 
-  def call
+  def call(input, bindings = {})
     @expr = @parser.call
-    if @input.is_a?(Array) && !Utils.get(@input, :sequence)
-      @input = Utils.create_sequence(@input)
-      Utils.set(@input, :outer_wrapper, true)
+
+    # If the variable bindings have been passed in, create a frame to hold these
+    exec_env = bindings.blank? ? @base_env : Jsonata::Frame.new(@base_env, bindings)
+    exec_env.bind("$", input)
+
+    # if the input is a JSON array, then wrap it in a singleton sequence so it gets treated as a single input
+    if input.is_a?(Array) && !Utils.get(input, :sequence)
+      input = Utils.create_sequence(input)
+      Utils.set(input, :outer_wrapper, true)
     end
-    evaluate(@expr, @input, @environment)
+    evaluate(@expr, input, exec_env)
+    # TO-DO catch error
+    #    // insert error message into structure
+    #    populateMessage(err); // possible side-effects on `err`
+    #    throw err;
   end
 
   # Evaluate expression against input data
@@ -517,22 +526,21 @@ class Jsonata
   # @returns {{bind: bind, lookup: lookup}} Created frame
   class Frame
     attr_accessor :is_parallel_call
+    attr_writer :bindings
 
-    def initialize(enclosing_environment = nil)
+    def initialize(enclosing_environment = nil, bindings = {})
       @enclosing_environment = enclosing_environment
-      @bindings = {}
+      @bindings = bindings
       @initialized_at = Time.now.utc
       @is_parallel_call = false
     end
 
     def bind(name, value)
-      name = name.to_s
       return nil if name == ""
       @bindings[name] = value
     end
 
     def lookup(name)
-      name = name.to_s
       @bindings[name] || @enclosing_environment.lookup(name)
     end
 
