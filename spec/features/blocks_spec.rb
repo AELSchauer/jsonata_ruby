@@ -31,7 +31,7 @@ describe "Blocks" do
 
   it "case003" do
     jsonata, input = build_jsonata(
-      expr: "($a:=1; $b:=2; $c:=($a:=4; $a+$b); $a+$c)",
+      expr: "($a:=1; $b:=2; $c:=($a:=4; $a+$b); $a+$c)"
     )
 
     expect(jsonata.call(input)).to eq(7)
