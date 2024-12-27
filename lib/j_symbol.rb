@@ -104,6 +104,7 @@ module JSymbol
             if @context.node.id == ".."
               # range operator
               range = JSymbol::Base.new(
+                context: @context,
                 type: "binary",
                 value: "..",
                 position: @context.node.position,

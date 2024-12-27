@@ -47,6 +47,7 @@ class Parser
     symbol(")")
     symbol("]")
     symbol("}")
+    symbol("..") # range operator
 
     # Infix Only
     symbol(".") # map operator

@@ -121,7 +121,7 @@ class Jsonata
       when "&"
         raise "EVALUATE BINARY -- evaluateStringConcat"
       when ".."
-        raise "EVALUATE BINARY -- evaluateRangeExpression"
+        evaluate_range_expression(lhs, rhs)
       when "in"
         raise "EVALUATE BINARY -- evaluateIncludesExpression"
       end
@@ -447,6 +447,27 @@ class Jsonata
     end
 
     result_sequence
+  end
+
+  # Evaluate range expression against input data
+  # @param {Object} lhs - LHS value
+  # @param {Object} rhs - RHS value
+  # @returns {Array} Resultant array
+  def evaluate_range_expression(lhs, rhs)
+    return nil if lhs.nil? || rhs.nil?
+    raise "T2003" if !lhs.is_a?(Numeric) || !(lhs % 1).zero?
+    raise "T2004" if !rhs.is_a?(Numeric) || !(rhs % 1).zero?
+    return nil if lhs > rhs 
+
+    # limit the size of the array to ten million entries (1e7)
+    # this is an implementation defined limit to protect against
+    # memory and performance issues.  This value may increase in the future.
+    size = rhs - lhs + 1
+    raise "D2014" if size > 1e7
+
+    result = Range.new(lhs.to_i, rhs.to_i).to_a
+    Utils.set(result, :sequence, true)
+    result
   end
 
   # Evaluate a step within a path
