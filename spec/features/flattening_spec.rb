@@ -22,7 +22,7 @@ describe "Flattening" do
     ])
   end
 
-  xit "case001" do
+  it "case001" do
     jsonata, input = build_jsonata(
       expr: "$.nest0",
       data: [
@@ -54,7 +54,7 @@ describe "Flattening" do
     expect(jsonata.call(input)).to eq([1, 2, 3, 4])
   end
 
-  xit "case003" do
+  it "case003" do
     jsonata, input = build_jsonata(
       expr: "$[0]",
       data: [
@@ -72,7 +72,7 @@ describe "Flattening" do
     })
   end
 
-  xit "case004" do
+  it "case004" do
     jsonata, input = build_jsonata(
       expr: "$[1]",
       data: [
@@ -108,7 +108,7 @@ describe "Flattening" do
     })
   end
 
-  xit "case006" do
+  it "case006" do
     jsonata, input = build_jsonata(
       expr: "$[0].nest0",
       data: [
@@ -124,7 +124,7 @@ describe "Flattening" do
     expect(jsonata.call(input)).to eq([1,2])
   end
 
-  xit "case007" do
+  it "case007" do
     jsonata, input = build_jsonata(
       expr: "$[1].nest0",
       data: [
@@ -140,7 +140,7 @@ describe "Flattening" do
     expect(jsonata.call(input)).to eq([3,4])
   end
 
-  xit "case008" do
+  it "case008" do
     jsonata, input = build_jsonata(
       expr: "$[0].nest0[0]",
       data: [

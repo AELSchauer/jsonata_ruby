@@ -42,7 +42,9 @@ class Parser
 
     # Base Symbol
     symbol(":")
+    symbol(";")
     symbol(",")
+    symbol(")")
     symbol("]")
     symbol("}")
 
@@ -68,6 +70,7 @@ class Parser
     symbol("**") # descendant wildcard (multi-level)
 
     # Infix and Prefix
+    symbol("(") # function invocation && parenthesis - block expression
     symbol("[") # array constructor & filter - predicate or array index
     symbol("{") # object constructor & object grouping
     symbol("-") # numeric subtraction & unary numeric negation
@@ -315,14 +318,23 @@ class Parser
         end
       end
     when "function", "partial"
-      raise "FUNCTION / PARTIAL"
+      raise "process_ast FUNCTION / PARTIAL"
     when "lambda"
-      raise "LAMBDA"
+      raise "process_ast LAMBDA"
     when "condition"
-      raise "CONDITION"
+      raise "process_ast CONDITION"
     when "transform"
-      raise "TRANSFORM"
+      raise "process_ast TRANSFORM"
     when "block"
+      result = JSymbol::Base.new(context: self, type: "block", position: expr.position)
+      result.expressions = expr.expressions.map do |item|
+        part = process_ast(item)
+        push_ancestry(result, part)
+        if part.consarray || (part.type == "path" && part.steps[0].consarray)
+          result.consarray = true
+        end
+        part
+      end
     when "name"
       result = JSymbol::Base.new(context: self, type: "path", steps: [expr])
       result.keep_singleton_array = expr.keep_array

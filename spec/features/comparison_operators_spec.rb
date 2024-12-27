@@ -183,7 +183,7 @@ describe "Comparison Operators" do
     expect(jsonata.call(input)).to eq(false)
   end
 
-  xit "case021" do
+  it "case021" do
     jsonata, input = build_jsonata(
       expr: "foo.blah.baz[fud = \"hello\"]",
       dataset: "dataset0"
@@ -205,7 +205,7 @@ describe "Comparison Operators" do
     })
   end
 
-  xit "case023" do
+  it "case023" do
     jsonata, input = build_jsonata(
       expr: "Account.Order.Product[Price > 30].Price",
       dataset: "dataset5"
@@ -256,7 +256,7 @@ describe "Comparison Operators" do
     expect(jsonata.call(input)).to eq(nil)
   end
 
-  xit "case028" do
+  it "case028" do
     # Undefined result
     jsonata, input = build_jsonata(
       expr:  "$x <= \"hello\"",

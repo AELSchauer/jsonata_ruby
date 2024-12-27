@@ -73,7 +73,7 @@ describe "Variables" do
     expect(jsonata.call(input)).to eq(5)
   end
 
-  xit "case006" do
+  it "case006" do
     jsonata, input = build_jsonata(
       expr: "($a := $b := 5; $a)"
     )
@@ -81,7 +81,7 @@ describe "Variables" do
     expect(jsonata.call(input)).to eq(5)
   end
 
-  xit "case007" do
+  it "case007" do
     jsonata, input = build_jsonata(
       expr: "($a := $b := 5; $b)"
     )
@@ -89,7 +89,7 @@ describe "Variables" do
     expect(jsonata.call(input)).to eq(5)
   end
 
-  xit "case008" do
+  it "case008" do
     jsonata, input = build_jsonata(
       expr: "( $a := 5; $a := $a + 2; $a )"
     )
@@ -106,7 +106,7 @@ describe "Variables" do
     expect(jsonata.call(input)).to eq(nil)
   end
 
-  xit "case010" do
+  it "case010" do
     jsonata, input = build_jsonata(
       expr: "( $foo := \"defined\"; ( $foo := nothing ); $foo )"
     )

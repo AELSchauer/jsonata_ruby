@@ -201,7 +201,7 @@ describe "Array Constructors" do
     ])
   end
 
-  xit "case017" do
+  it "case017" do
     jsonata, input = build_jsonata(
       expr: "[0,1,2,3,4,5,6,7,8,9][$ % 2 = 0]",
       data: nil
@@ -210,7 +210,7 @@ describe "Array Constructors" do
     expect(jsonata.call(input)).to eq([0,2,4,6,8])
   end
 
-  xit "case018" do
+  it "case018" do
     jsonata, input = build_jsonata(
       expr: "[1, 2, 3].$",
       data: nil
@@ -219,7 +219,7 @@ describe "Array Constructors" do
     expect(jsonata.call(input)).to eq([1,2,3])
   end
 
-  xit "case019" do
+  it "case019" do
     jsonata, input = build_jsonata(
       expr: "[1, 2, 3].$",
       data: []
@@ -228,7 +228,7 @@ describe "Array Constructors" do
     expect(jsonata.call(input)).to eq([1,2,3])
   end
 
-  xit "case020" do
+  it "case020" do
     jsonata, input = build_jsonata(
       expr: "[1, 2, 3].$",
       data: [4,5,6]

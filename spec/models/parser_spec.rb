@@ -233,7 +233,6 @@ describe Parser do
 
           # Test
           expr = parser.expression(0)
-          # debugger
           expect(expr.to_h).to match({
             "value" => "[",
             "type" => "binary",
@@ -630,7 +629,6 @@ describe Parser do
             "value" => "-",
             "type" => "unary",
             "position" => 3,
-            "expressions" => [],
             "expression" => { "value" => 3, "type" => "number", "position" => 4 }
           }
         })
@@ -826,7 +824,6 @@ describe Parser do
           "value" => "{",
           "type" => "unary",
           "position" => 1,
-          "expressions" => [],
           "lhs" => [
             [
               { "value" => "key", "type" => "string", "position" => 6 },
@@ -840,7 +837,6 @@ describe Parser do
           "value" => "{",
           "type" => "unary",
           "position" => 1,
-          "expressions" => [],
           "lhs" => [
             [
               { "value" => "key", "type" => "string", "position" => 6 },
@@ -859,7 +855,6 @@ describe Parser do
         
         ## Test      
         expr = parser.expression(0)
-        # debugger
         expect(expr.to_h).to match({
           "value" => "{",
           "type" => "binary",
@@ -997,6 +992,92 @@ describe Parser do
             "type" => "number",
             "position" => 7
           }
+        })
+      end
+    end
+
+    describe "variable assignment with ()" do
+      it "returns the expected expression and processed steps" do
+        ## Setup
+        parser = Parser.new("($a := $b := 5; $a)")
+        parser.setup
+        
+        ## Test      
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "value" => "(",
+          "type" => "block",
+          "position" => 1,
+          "expressions" => [
+            {
+              "value" => ":=",
+              "type" => "binary",
+              "position" => 6,
+              "lhs" => {
+                "value" => "a",
+                "type" => "variable",
+                "position" => 3
+              },
+              "rhs" => {
+                "value" => ":=",
+                "type" => "binary",
+                "position" => 12,
+                "lhs" => {
+                  "value" => "b",
+                  "type" => "variable",
+                  "position" => 9
+                },
+                "rhs" => {
+                  "value" => 5.0,
+                  "type" => "number",
+                  "position" => 14
+                }
+              }
+            },
+            {
+              "value" => "a",
+              "type" => "variable",
+              "position" => 18
+            }
+          ]
+        })
+  
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "block",
+          "position" => 1,
+          "expressions" => [
+            {
+              "type" => "bind",
+              "value" => ":=",
+              "position" => 6,
+              "lhs" => {
+                "value" => "a",
+                "type" => "variable",
+                "position" => 3
+              },
+              "rhs" => {
+                "type" => "bind",
+                "value" => ":=",
+                "position" => 12,
+                "lhs" => {
+                  "value" => "b",
+                  "type" => "variable",
+                  "position" => 9
+                },
+                "rhs" => {
+                  "value" => 5.0,
+                  "type" => "number",
+                  "position" => 14
+                }
+              }
+            },
+            {
+              "value" => "a",
+              "type" => "variable",
+              "position" => 18
+            }
+          ]        
         })
       end
     end

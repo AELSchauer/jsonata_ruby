@@ -141,7 +141,7 @@ describe "Descendent Operator" do
     ])
   end
 
-  xit "case010" do
+  it "case010" do
     jsonata, input = build_jsonata(
       expr: "(foo.**.fud)[0]",
       dataset: "dataset0"
@@ -150,7 +150,7 @@ describe "Descendent Operator" do
     expect(jsonata.call(input)).to eq("hello")
   end
 
-  xit "case011" do
+  it "case011" do
     jsonata, input = build_jsonata(
       expr: "(**.fud)[0]",
       dataset: "dataset0"
@@ -187,7 +187,7 @@ describe "Descendent Operator" do
     ])
   end
 
-  xit "case014" do
+  it "case014" do
     jsonata, input = build_jsonata(
       expr: "(**.Price)[0]",
       dataset: "dataset5"

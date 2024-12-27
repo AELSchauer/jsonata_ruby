@@ -5,7 +5,7 @@ module JSymbol
 
     attr_accessor :keep_singleton_array, :seeking_parent
 
-    def initialize(context:, recover: nil, arguments: nil, arr: nil, consarray: nil, expression: nil, expressions: [], group: nil, focus: nil, id: nil, keep_array: nil, keep_singleton: nil, lbp: nil, level: nil, lhs: nil, position: nil, predicates: nil, procedure: nil, rhs: nil, sequence: false, stages: nil, steps: nil, terms: nil, then_proc: nil, tuple: nil, tuple_stream: nil, type: nil, value: nil)
+    def initialize(context:, recover: nil, arguments: nil, arr: nil, consarray: nil, expression: nil, expressions: nil, group: nil, focus: nil, id: nil, keep_array: nil, keep_singleton: nil, lbp: nil, level: nil, lhs: nil, position: nil, predicates: nil, procedure: nil, rhs: nil, sequence: false, stages: nil, steps: nil, terms: nil, then_proc: nil, tuple: nil, tuple_stream: nil, type: nil, value: nil)
       @context = context
       @recover = recover
       @arguments = arguments
@@ -31,8 +31,7 @@ module JSymbol
     end
 
     def to_h
-      map_vars = [:@consarray, :@expression, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value, :@group, :@stages]
-      map_vars.concat([:@expressions]) if @type == "unary"
+      map_vars = [:@consarray, :@expression, :@expressions, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value, :@group, :@stages]
       map_vars
         .reject { |key| instance_variable_get(key).nil? }
         .reduce({}) do |hsh, key|
@@ -45,14 +44,8 @@ module JSymbol
 
     def led(left)
       case @value
-      when ":="
-        if left.type != "variable"
-          raise "S0212"
-        end
-        @lhs = left
-        # subtract 1 from binding_power for right associative operators
-        @rhs = @context.expression(Tokenizer::OPERATORS[":="] - 1)
-        @type = "binary"
+      when "("
+        raise "JSYMBOL LED ("
       when "["
         if @context.node.id == "]"
           # empty predicate means maintain singleton arrays in the output
@@ -73,20 +66,36 @@ module JSymbol
         @lhs = left
         @rhs = object_parser
         @type = "binary"
-        # debugger
+      when ":="
+        if left.type != "variable"
+          raise "S0212"
+        end
+        @lhs = left
+        # subtract 1 from binding_power for right associative operators
+        @rhs = @context.expression(Tokenizer::OPERATORS[":="] - 1)
+        @type = "binary"
       else
         @lhs = left
         @rhs = @context.expression(@lbp)
         @type = "binary"
-        # debugger
       end
       self
     end
 
     def nud
       case @value
-      when "**"
-        @type = "descendant";
+      when "("
+        expressions = []
+        while @context.node.id != ")"
+          expressions.push(@context.expression(0))
+          if @context.node.id != ";"
+            break
+          end
+          @context.advance(";")
+        end
+        @context.advance(")", true)
+        @type = "block"
+        @expressions = expressions
       when "["
         arr = []
         if @context.node.id != "]"
@@ -118,6 +127,8 @@ module JSymbol
       when "-"
         @expression = @context.expression(70);
         @type = "unary";
+      when "**"
+        @type = "descendant";
       end
 
       self

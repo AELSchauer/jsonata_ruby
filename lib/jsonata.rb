@@ -58,10 +58,12 @@ class Jsonata
       expr.value
     when "descendant"
       evaluate_descendants(expr, input)
-    when "variable"
-      evaluate_variable(expr, input, environment)
+    when "block"
+      evaluate_block(expr, input, environment)
     when "bind"
       evaluate_bind_expression(expr, input, environment)
+    when "variable"
+      evaluate_variable(expr, input, environment)
     else
       raise "EVALUATE -- #{expr.type}"
     end
@@ -139,6 +141,20 @@ class Jsonata
     value = evaluate(expr.rhs, input, environment)
     environment.bind(expr.lhs.value, value)
     value
+  end
+
+  # Evaluate block against input data
+  # @param {Object} expr - JSONata expression
+  # @param {Object} input - Input data to evaluate against
+  # @param {Object} environment - Environment
+  # @returns {*} Evaluated input data
+  def evaluate_block(expr, input, environment)
+    result = nil
+    frame = Frame.new(environment)
+    expr.expressions.each do |item|
+      result = evaluate(item, input, frame)
+    end
+    result
   end
 
   # Evaluate boolean expression against input data
