@@ -49,7 +49,7 @@ class Jsonata
     when "binary"
       evaluate_binary(expr, input, environment)
     when "unary"
-      evaluate_unary(expr, input, environment);
+      evaluate_unary(expr, input, environment)
     when "name"
       evaluate_name(expr, input, environment)
     when "number"
@@ -57,7 +57,11 @@ class Jsonata
     when "string", "value"
       expr.value
     when "descendant"
-      evaluate_descendants(expr, input);
+      evaluate_descendants(expr, input)
+    when "variable"
+      evaluate_variable(expr, input, environment)
+    when "bind"
+      evaluate_bind_expression(expr, input, environment)
     else
       raise "EVALUATE -- #{expr.type}"
     end
@@ -122,6 +126,19 @@ class Jsonata
     # rescue => e
     #   raise "EVALUATE BINARY EXPRESSION ERROR"
     # end
+  end
+
+  # Evaluate bind expression against input data
+  # @param {Object} expr - JSONata expression
+  # @param {Object} input - Input data to evaluate against
+  # @param {Object} environment - Environment
+  # @returns {*} Evaluated input data
+  def evaluate_bind_expression(expr, input, environment)
+    # The RHS is the expression to evaluate
+    # The LHS is the name of the variable to bind to - should be a VARIABLE token (enforced by parser)
+    value = evaluate(expr.rhs, input, environment)
+    environment.bind(expr.lhs.value, value)
+    value
   end
 
   # Evaluate boolean expression against input data
@@ -501,6 +518,20 @@ class Jsonata
     end
 
     result
+  end
+
+  # Evaluate variable against input data
+  # @param {Object} expr - JSONata expression
+  # @param {Object} input - Input data to evaluate against
+  # @param {Object} environment - Environment
+  # @returns {*} Evaluated input data
+  def evaluate_variable(expr, input, environment)
+    # if the variable name is empty string, then it refers to context value
+    if expr.value.blank?
+      input.present? && Utils.get(input, :outer_wrapper) ? input[0] : input
+    else
+      environment.lookup(expr.value)
+    end
   end
 
   # Recurse through descendants

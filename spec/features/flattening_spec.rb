@@ -27,18 +27,12 @@ describe "Flattening" do
       expr: "$.nest0",
       data: [
         {
-            "nest0": [
-                1,
-                2
-            ]
+          "nest0" => [1,2]
         },
         {
-            "nest0": [
-                3,
-                4
-            ]
+          "nest0" => [3,4]
         }
-    ]
+      ]
     )
 
     expect(jsonata.call(input)).to eq([1, 2, 3, 4])
@@ -49,16 +43,10 @@ describe "Flattening" do
       expr: "nest0",
       data: [
         {
-            "nest0" => [
-                1,
-                2
-            ]
+          "nest0" => [1,2]
         },
         {
-            "nest0" => [
-                3,
-                4
-            ]
+          "nest0" => [3,4]
         }
       ]
     )
@@ -71,25 +59,16 @@ describe "Flattening" do
       expr: "$[0]",
       data: [
         {
-            "nest0": [
-                1,
-                2
-            ]
+          "nest0" => [1,2]
         },
         {
-            "nest0": [
-                3,
-                4
-            ]
+          "nest0" => [3,4]
         }
       ]
     )
 
     expect(jsonata.call(input)).to eq({
-      "nest0" => [
-          1,
-          2
-      ]
+      "nest0" => [1,2]
     })
   end
 
@@ -98,16 +77,10 @@ describe "Flattening" do
       expr: "$[1]",
       data: [
         {
-          "nest0": [
-            1,
-            2
-          ]
+          "nest0" => [1,2]
         },
         {
-          "nest0": [
-            3,
-            4
-          ]
+          "nest0" => [3,4]
         }
       ]
     )
@@ -117,15 +90,15 @@ describe "Flattening" do
     })
   end
 
-  xit "case005" do
+  it "case005" do
     jsonata, input = build_jsonata(
       expr: "$[-1]",
       data: [
         {
-          "nest0": [1,2]
+          "nest0" => [1,2]
         },
         {
-          "nest0": [3,4]
+          "nest0" => [3,4]
         }
       ]
     )
@@ -140,10 +113,10 @@ describe "Flattening" do
       expr: "$[0].nest0",
       data: [
         {
-          "nest0": [1,2]
+          "nest0" => [1,2]
         },
         {
-          "nest0": [3,4]
+          "nest0" => [3,4]
         }
       ]
     )
@@ -156,10 +129,10 @@ describe "Flattening" do
       expr: "$[1].nest0",
       data: [
         {
-          "nest0": [ 1, 2 ]
+          "nest0" => [ 1, 2 ]
         },
         {
-          "nest0": [3,4]
+          "nest0" => [3,4]
         }
       ]
     )
@@ -172,10 +145,10 @@ describe "Flattening" do
       expr: "$[0].nest0[0]",
       data: [
         {
-          "nest0": [1,2]
+          "nest0" => [1,2]
         },
         {
-          "nest0": [3,4]
+          "nest0" => [3,4]
         }
       ]
     )
@@ -660,7 +633,7 @@ describe "Flattening" do
     jsonata, input = build_jsonata(
       expr: "$.tags[title='example'][]",
       data: {
-        "tags": [
+        "tags" => [
           {
             "title": "example",
             "description": "Hello"

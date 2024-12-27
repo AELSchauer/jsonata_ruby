@@ -253,7 +253,7 @@ describe "Comparison Operators" do
       expr:  "3 > $x",
     )
 
-    expect(jsonata.call(input)).to eq()
+    expect(jsonata.call(input)).to eq(nil)
   end
 
   xit "case028" do
@@ -262,6 +262,6 @@ describe "Comparison Operators" do
       expr:  "$x <= \"hello\"",
     )
 
-    expect(jsonata.call(input)).to eq()
+    expect(jsonata.call(input)).to eq(nil)
   end
 end

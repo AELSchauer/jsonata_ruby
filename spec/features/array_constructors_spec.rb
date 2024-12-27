@@ -52,22 +52,23 @@ describe "Array Constructors" do
     expect(jsonata.call(input)).to eq([1, "two", ["three", 4]])
   end
 
-  xit "case006" do
-    # TO-DO Bindings
-    # "expr": "[1, $two, [\"three\", $four]]",
-    # "dataset": "dataset5",
-    # "bindings": {
-    #     "two": 2,
-    #     "four": "four"
-    # },
-    # "result": [
-    #     1,
-    #     2,
-    #     [
-    #         "three",
-    #         "four"
-    #     ]
-    # ]
+  it "case006" do
+    jsonata, input = build_jsonata(
+      expr: "[1, $two, [\"three\", $four]]"
+    )
+    bindings = {
+      "two" => 2,
+      "four" => "four"
+    }
+
+    expect(jsonata.call(input, bindings)).to eq([
+      1,
+      2,
+      [
+        "three",
+        "four"
+      ]
+    ])
   end
 
   it "case007" do

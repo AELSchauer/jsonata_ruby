@@ -45,6 +45,14 @@ module JSymbol
 
     def led(left)
       case @value
+      when ":="
+        if left.type != "variable"
+          raise "S0212"
+        end
+        @lhs = left
+        # subtract 1 from binding_power for right associative operators
+        @rhs = @context.expression(Tokenizer::OPERATORS[":="] - 1)
+        @type = "binary"
       when "["
         if @context.node.id == "]"
           # empty predicate means maintain singleton arrays in the output
@@ -57,7 +65,7 @@ module JSymbol
           return left
         else
           @lhs = left;
-          @rhs = @context.expression(Tokenizer::OPERATORS["]"]);
+          @rhs = @context.expression(Tokenizer::OPERATORS["]"])
           @type = "binary";
           @context.advance("]", true);
         end

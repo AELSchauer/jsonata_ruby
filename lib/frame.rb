@@ -15,7 +15,7 @@ class Frame
   end
 
   def lookup(name)
-    @bindings[name] || @enclosing_environment.lookup(name)
+    @bindings[name] || @enclosing_environment&.lookup(name)
   end
 
   def timestamp

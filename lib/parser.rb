@@ -61,8 +61,11 @@ class Parser
     symbol("and") # Boolean AND
     symbol("or") # Boolean OR
 
+    # Infixr Only
+    symbol(":=") # bind variable
+
     # Prefix Only
-    symbol("**")
+    symbol("**") # descendant wildcard (multi-level)
 
     # Infix and Prefix
     symbol("[") # array constructor & filter - predicate or array index
@@ -244,7 +247,16 @@ class Parser
       when "^"
         raise "BINARY ^"
       when ":="
-        raise "BINARY :="
+        # raise "BINARY :="
+        result = JSymbol::Base.new(
+          context: self,
+          type: "bind",
+          value: expr.value,
+          position: expr.position,
+          lhs: process_ast(expr.lhs),
+          rhs: process_ast(expr.rhs)
+        )
+        push_ancestry(result, result.rhs)
       when "@"
         raise "BINARY @"
       when "#"

@@ -956,4 +956,49 @@ describe Parser do
       end
     end
   end
+
+  describe "variables" do
+    describe "variable assignment" do
+      it "returns the expected expression and processed steps" do
+        ## Setup
+        parser = Parser.new("$a := 5")
+        parser.setup
+        
+        ## Test      
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "value" => ":=",
+          "type" => "binary",
+          "position" => 5,
+          "lhs" => {
+            "value" => "a",
+            "type" => "variable",
+            "position" => 2
+          },
+          "rhs" => {
+            "value" => 5.0,
+            "type" => "number",
+            "position" => 7
+          }
+        })
+  
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "bind",
+          "value" => ":=",
+          "position" => 5,
+          "lhs" => {
+            "value" => "a",
+            "type" => "variable",
+            "position" => 2
+          },
+          "rhs" => {
+            "value" => 5.0,
+            "type" => "number",
+            "position" => 7
+          }
+        })
+      end
+    end
+  end
 end

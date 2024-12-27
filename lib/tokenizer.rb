@@ -26,6 +26,7 @@ class Tokenizer
     "=",
     ">",
     ">=",
+    ":=",
     # "~>",
     "and",
     # "in",
@@ -143,6 +144,7 @@ class Tokenizer
     if current_char == ":" && @path[@position + 1] == "="
       # := assignment
       @position += 2
+      debugger
       return create("operator", ":=")
     end
     if current_char == "!" && @path[@position + 1] == "="
@@ -245,21 +247,21 @@ class Tokenizer
     end
 
     # test for names
-    i = @position
+    pos = @position
     ch = nil
     result = nil
     while result.nil?
-      ch = @path[i]
+      ch = @path[pos]
 
-      if i == @length || " \t\n\r\v".index(ch).present? || OPERATORS[ch].present?
+      if pos == @length || " \t\n\r\v".index(ch).present? || OPERATORS[ch].present?
         if @path[@position] == "$"
           # variable reference
-          name = @path[@position + 1, i]
-          @position = i
+          name = @path[@position + 1, pos - @position - 1]
+          @position = pos
           result = create("variable", name)
         else
-          name = @path[@position, i - @position]
-          @position = i
+          name = @path[@position, pos - @position]
+          @position = pos
           case name
           when "or", "in", "and"
             result = create("operator", name)
@@ -278,7 +280,7 @@ class Tokenizer
           end
         end
       else
-        i += 1
+        pos += 1
       end
     end
 
