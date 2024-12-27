@@ -337,7 +337,9 @@ class Parser
       end
     when "name"
       result = JSymbol::Base.new(context: self, type: "path", steps: [expr])
-      result.keep_singleton_array = expr.keep_array
+      if expr.keep_array
+        result.keep_singleton_array = true
+      end
     when "parent"
     when "string", "number", "value", "wildcard", "descendant", "variable", "regex"
       result = expr
@@ -351,6 +353,10 @@ class Parser
       else
         raise "S0201"
       end
+    end
+
+    if expr.keep_array
+      result.keep_array = true
     end
 
     result

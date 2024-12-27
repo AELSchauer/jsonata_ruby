@@ -31,7 +31,7 @@ module JSymbol
     end
 
     def to_h
-      map_vars = [:@consarray, :@expression, :@expressions, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value, :@group, :@stages]
+      map_vars = [:@consarray, :@expression, :@expressions, :@keep_array, :@lhs, :@position, :@rhs, :@predicates, :@steps, :@type, :@value, :@group, :@stages]
       map_vars
         .reject { |key| instance_variable_get(key).nil? }
         .reduce({}) do |hsh, key|

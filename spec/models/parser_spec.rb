@@ -811,14 +811,175 @@ describe Parser do
     end
   end
 
+  describe "flattening" do
+    describe "with root binding $" do
+      it "returns the expected expression and processed steps" do
+        ## Setup
+        parser = Parser.new("$.a[0].b")
+        parser.setup
+
+        ## Test
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "value" => ".",
+          "type" => "binary",
+          "position" => 7,
+          "lhs" => {
+            "value" => ".",
+            "type" => "binary",
+            "position" => 2,
+            "lhs" => {
+              "value" => "",
+              "type" => "variable",
+              "position" => 1
+            },
+            "rhs" => {
+              "value" => "[",
+              "type" => "binary",
+              "position" => 4,
+              "lhs" => {
+                "value" => "a",
+                "type" => "name",
+                "position" => 3
+              },
+              "rhs" => {
+                "value" => 0,
+                "type" => "number",
+                "position" => 5
+              }
+            }
+          },
+          "rhs" => {
+            "value" => "b",
+            "type" => "name",
+            "position" => 8
+          }
+        })
+
+        expr = parser.process_ast(expr)
+        expect(expr.to_h).to match({
+          "type" => "path",
+          "steps" => [
+            {
+              "value" => "",
+              "type" => "variable",
+              "position" => 1
+            },
+            {
+              "value" => "a",
+              "type" => "name",
+              "position" => 3,
+              "stages" => [
+                {
+                  "type" => "filter",
+                  "expression" => {
+                    "value" => 0,
+                    "type" => "number",
+                    "position" => 5
+                  },
+                  "position" => 4
+                }
+              ]
+            },
+            {
+              "value" => "b",
+              "type" => "name",
+              "position" => 8
+            }
+          ]
+        })
+      end
+    end
+
+    describe "with array wrapper" do
+      it "returns the expected expression and processed steps" do
+        ## Setup
+        parser = Parser.new("$.tags[title='example'][]")
+        parser.setup
+
+        ## Test
+        expr = parser.expression(0)
+        expect(expr.to_h).to match({
+          "value" => ".",
+          "type" => "binary",
+          "position" => 2,
+          "lhs" => {
+            "value" => "",
+            "type" => "variable",
+            "position" => 1
+          },
+          "rhs" => {
+            "value" => "[",
+            "type" => "binary",
+            "position" => 7,
+            "lhs" => {
+              "value" => "tags",
+              "type" => "name",
+              "position" => 6,
+              "keep_array" => true
+            },
+            "rhs" => {
+              "value" => "=",
+              "type" => "binary",
+              "position" => 13,
+              "lhs" => {
+                "value" => "title",
+                "type" => "name",
+                "position" => 12
+              },
+              "rhs" => {
+                "value" => "example",
+                "type" => "string",
+                "position" => 22
+              }
+            }
+          }
+        })
+
+        # expr = parser.process_ast(expr)
+        # expect(expr.to_h).to match({
+        #   "type" => "path",
+        #   "steps" => [
+        #     {
+        #       "value" => "",
+        #       "type" => "variable",
+        #       "position" => 1
+        #     },
+        #     {
+        #       "value" => "a",
+        #       "type" => "name",
+        #       "position" => 3,
+        #       "stages" => [
+        #         {
+        #           "type" => "filter",
+        #           "expression" => {
+        #             "value" => 0,
+        #             "type" => "number",
+        #             "position" => 5
+        #           },
+        #           "position" => 4
+        #         }
+        #       ]
+        #     },
+        #     {
+        #       "value" => "b",
+        #       "type" => "name",
+        #       "position" => 8
+        #     }
+        #   ]
+        # })
+      end
+    end
+  end
+
   describe "object constructors" do
     describe "simple key/value pairs" do
       it "returns the expected expression and processed steps" do
         ## Setup
         parser = Parser.new("{\"key\": \"value\"}")
         parser.setup
-        
-        ## Test      
+
+        ## Test
         expr = parser.expression(0)
         expect(expr.to_h).to match({
           "value" => "{",
@@ -831,7 +992,7 @@ describe Parser do
             ]
           ]
         })
-  
+
         expr = parser.process_ast(expr)
         expect(expr.to_h).to match({
           "value" => "{",
@@ -899,7 +1060,7 @@ describe Parser do
             ]
           ]
         })
-  
+
         expr = parser.process_ast(expr)
         expect(expr.to_h).to match({
           "type" => "path",
@@ -976,7 +1137,7 @@ describe Parser do
             "position" => 7
           }
         })
-  
+
         expr = parser.process_ast(expr)
         expect(expr.to_h).to match({
           "type" => "bind",
@@ -1041,7 +1202,7 @@ describe Parser do
             }
           ]
         })
-  
+
         expr = parser.process_ast(expr)
         expect(expr.to_h).to match({
           "type" => "block",

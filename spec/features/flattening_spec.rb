@@ -483,7 +483,7 @@ describe "Flattening" do
     expect(jsonata.call(input)).to eq([1])
   end
 
-  xit "case034a" do
+  it "case034a" do
     jsonata, input = build_jsonata(
       expr: "$.a[0].b",
       data: [
@@ -502,7 +502,7 @@ describe "Flattening" do
       ]
     )
 
-    expect(jsonata.call(input)).to eq([1])
+    expect(jsonata.call(input)).to eq([1,3])
   end
 
   it "case035" do
@@ -602,22 +602,36 @@ describe "Flattening" do
     })
   end
 
-  xit "case042" do
+  it "case042" do
     jsonata, input = build_jsonata(
       expr: "$[type='command'][]",
-      data: [{"type":"command"},{"type":"commands"}]
+      data: [
+        {
+          "type" => "command"
+        },
+        {
+          "type" => "commands"
+        }
+      ]
     )
 
-    expect(jsonata.call(input)).to eq([{"type":"command"}])
+    expect(jsonata.call(input)).to eq([{"type" => "command"}])
   end
 
   xit "case043" do
     jsonata, input = build_jsonata(
       expr: "$[][type='command']",
-      data: [{"type":"command"},{"type":"commands"}]
+      data: [
+        {
+          "type" => "command"
+        },
+        {
+          "type" => "commands"
+        }
+      ]
     )
 
-    expect(jsonata.call(input)).to eq([{"type":"command"}])
+    expect(jsonata.call(input)).to eq([{"type" => "command"}])
   end
 
   xit "case044" do
@@ -635,13 +649,18 @@ describe "Flattening" do
       data: {
         "tags" => [
           {
-            "title": "example",
-            "description": "Hello"
+            "title" => "example",
+            "description" => "Hello"
           }
         ]
       }
     )
 
-    expect(jsonata.call(input)).to eq([5])
+    expect(jsonata.call(input)).to eq([
+      {
+        "title" => "example",
+        "description" => "Hello"
+      }
+    ])
   end
 end
