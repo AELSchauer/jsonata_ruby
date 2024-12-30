@@ -144,7 +144,6 @@ class Tokenizer
     if current_char == ":" && @path[@position + 1] == "="
       # := assignment
       @position += 2
-      debugger
       return create("operator", ":=")
     end
     if current_char == "!" && @path[@position + 1] == "="

@@ -87,7 +87,17 @@ class Utils
       end
     end
 
+    # @param {Object} arg - expression to test
+    # @returns {boolean} - true if it is a function (lambda or built-in)
     def is_function?(arg)
+      false
+    end
+
+    def is_lambda?(arg)
+      false
+    end
+
+    def is_iterable?(arg)
       false
     end
 

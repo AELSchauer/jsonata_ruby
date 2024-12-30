@@ -42,4 +42,18 @@ class Functions
     end
     result
   end
+
+  # Sum function
+  # @param {Object} arr - array of numbers
+  # @returns {number} Total value of arguments
+  def sum(args)
+    args = args[0]
+    if args.is_a?(Numeric)
+      args
+    elsif args.all? { |e| e.is_a?(Numeric) }
+      args.sum
+    else
+      nil
+    end
+  end
 end

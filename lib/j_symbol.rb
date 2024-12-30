@@ -1,11 +1,11 @@
 module JSymbol
   class Base
-    attr_reader :arguments, :focus, :group, :id, :keep_singleton, :level, :lhs, :procedure, :rhs, :sequence, :steps, :terms, :tuple_stream, :then_proc, :tuple
-    attr_accessor :consarray, :expression, :expressions, :group, :keep_array, :lbp, :lhs, :predicates, :position, :rhs, :stages, :type, :value
+    attr_reader :focus, :group, :id, :implementation, :is_jsonata_function, :keep_singleton, :level, :lhs, :name, :rhs, :sequence, :signature, :steps, :terms, :tuple_stream, :then_proc, :tuple
+    attr_accessor :arguments, :consarray, :expression, :expressions, :group, :keep_array, :lbp, :lhs, :position, :predicates, :procedure, :rhs, :stages, :token, :type, :value
 
     attr_accessor :keep_singleton_array, :seeking_parent
 
-    def initialize(context:, recover: nil, arguments: nil, arr: nil, consarray: nil, expression: nil, expressions: nil, group: nil, focus: nil, id: nil, keep_array: nil, keep_singleton: nil, lbp: nil, level: nil, lhs: nil, position: nil, predicates: nil, procedure: nil, rhs: nil, sequence: false, stages: nil, steps: nil, terms: nil, then_proc: nil, tuple: nil, tuple_stream: nil, type: nil, value: nil)
+    def initialize(context:, recover: nil, arguments: nil, arr: nil, consarray: nil, expression: nil, expressions: nil, group: nil, focus: nil, id: nil, implementation: nil, is_jsonata_function: false, keep_array: nil, keep_singleton: nil, lbp: nil, level: nil, lhs: nil, name: nil, position: nil, predicates: nil, procedure: nil, rhs: nil, sequence: false, stages: nil, signature: nil, steps: nil, terms: nil, then_proc: nil, token: nil, tuple: nil, tuple_stream: nil, type: nil, value: nil)
       @context = context
       @recover = recover
       @arguments = arguments
@@ -14,17 +14,23 @@ module JSymbol
       @expressions = expressions
       @group = group
       @id = id
+      @implementation = implementation
+      @is_jsonata_function = is_jsonata_function
       @keep_array = keep_array
       @predicates = predicates
       @procedure = procedure
       @lbp = Tokenizer::INFIXES.include?(value) ? Tokenizer::OPERATORS[value] : 0
       @level = level
       @lhs = lhs
+      @name = name
       @position = position
       @rhs = rhs
+      @sequence = sequence
+      @signature = signature
       @steps = steps
       @terms = terms
       @then_proc = then_proc
+      @token = token
       @tuple = tuple
       @type = type
       @value = value
@@ -45,7 +51,28 @@ module JSymbol
     def led(left)
       case @value
       when "("
-        raise "JSYMBOL LED ("
+        @procedure = left
+        @type = "function"
+        @arguments = []
+        if @context.node.id != ")"
+          while true
+            if @context.node.type == "operator" && @context.node.id == "?"
+              # partial function application
+              @type = "partial"
+              @arguments.push(@context.node)
+              @context.advance("?")
+            else
+              @arguments.push(@context.expression(0))
+            end
+            break if @context.node.id != ","
+            @context.advance(",")
+          end
+        end
+        @context.advance(")", true)
+        # if the name of the function is 'function' or λ, then this is function definition (lambda function)
+        if left.type == "name" && (left.value == "function" || left.value == "\u03BB")
+          raise "JSYMBOL LED LEFT FUNCTION"
+        end
       when "["
         if @context.node.id == "]"
           # empty predicate means maintain singleton arrays in the output
@@ -79,6 +106,7 @@ module JSymbol
         @rhs = @context.expression(@lbp)
         @type = "binary"
       end
+
       self
     end
 

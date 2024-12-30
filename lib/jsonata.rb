@@ -1,6 +1,7 @@
 require "./lib/frame"
 require "./lib/functions"
 require "./lib/parser"
+require "./lib/signature"
 require "./lib/utils"
 
 class Jsonata
@@ -8,7 +9,7 @@ class Jsonata
     @options = options
     @parser = Parser.new(expr)
     @fn = Functions.new(context: @parser)
-    @static_frame = Frame.new
+    setup_static_frame
     @base_env = Frame.new(@static_frame)
   end
 
@@ -29,6 +30,53 @@ class Jsonata
     #    // insert error message into structure
     #    populateMessage(err); // possible side-effects on `err`
     #    throw err;
+  end
+
+  # Apply procedure or function
+  # @param {Object} proc - Procedure
+  # @param {Array} args - Arguments
+  # @param {Object} input - input
+  # @param {Object} environment - environment
+  # @returns {*} Result of procedure
+  def apply(proc, args, input, environment)
+    result = apply_inner(proc, args, input, environment)
+    while Utils.is_lambda?(result) && result.thunk
+      raise "APPLY is_lambda?"
+    end
+
+    result
+  end
+
+  def apply_inner(proc, args, input, environment)
+    # begin
+      validated_args = proc.blank? ? args : proc.signature.validate_arguments(args, input)
+      if Utils.is_lambda?(proc)
+        raise "APPLY INNER is_lambda?"
+      elsif proc && proc.is_jsonata_function
+        result = proc.implementation.call(validated_args)
+        if Utils.is_iterable?(result)
+          raise "APPLY INNER is_iterable?"
+        end
+      else
+        raise "APPLY INNER is function?"
+      end
+    # rescue => err
+    # end
+
+    result
+  end
+
+  # Creates a function definition
+  # @param {Function} method_name - Utils method name
+  # @param {string} signature - JSONata function signature definition
+  # @returns {{implementation: *, signature: *}} function definition
+  def define_function(method_name, signature)
+    JSymbol::Base.new(
+      context: @parser,
+      is_jsonata_function: true,
+      implementation: @fn.method(method_name),
+      signature: signature.nil? ? nil : Signature.new(signature)
+    )
   end
 
   # Evaluate expression against input data
@@ -62,6 +110,8 @@ class Jsonata
       evaluate_block(expr, input, environment)
     when "bind"
       evaluate_bind_expression(expr, input, environment)
+    when "function"
+      evaluate_function(expr, input, environment)
     when "variable"
       evaluate_variable(expr, input, environment)
     else
@@ -171,7 +221,6 @@ class Jsonata
     end
   end
 
-
   # Evaluate comparison expression against input data
   # @param {Object} lhs - LHS value
   # @param {Object} rhs - RHS value
@@ -230,32 +279,6 @@ class Jsonata
     end
   end
 
-  # Evaluate numeric expression against input data
-  # @param {Object} lhs - LHS value
-  # @param {Object} rhs - RHS value
-  # @param {Object} op - opcode
-  # @returns {*} Result
-  def evaluate_numeric_expression(lhs, rhs, op)
-    return nil if lhs.nil? || rhs.nil?
-    raise "T2001" unless Utils.is_numeric?(lhs)
-    raise "T2002" unless Utils.is_numeric?(rhs)
-
-    case op
-    when "+"
-      lhs + rhs
-    when "-"
-      lhs - rhs
-    when "*"
-      lhs * rhs
-    when "/"
-      result_float = lhs.is_a?(Float) || rhs.is_a?(Float)
-      result = lhs.to_f / rhs.to_f
-      !result_float && result % 1 == 0 ? result.to_i : result
-    when "%"
-      lhs % rhs
-    end
-  end
-
   # Apply filter predicate to input data
   # @param {Object} predicate - filter expression
   # @param {Object} input - Input data to a# pply predicates against
@@ -308,6 +331,50 @@ class Jsonata
     end
 
     results
+  end
+
+  # Evaluate function against input data
+  # @param {Object} expr - JSONata expression
+  # @param {Object} input - Input data to evaluate against
+  # @param {Object} environment - Environment
+  # @returns {*} Evaluated input data
+  def evaluate_function(expr, input, environment, applyto = nil)
+    # create the procedure
+    # can't assume that expr.procedure is a lambda type directly
+    # could be an expression that evaluates to a function (e.g. variable reference, parens expr etc.
+    # evaluate it generically first, then check that it is a function.  Throw error if not.
+    
+    proc = evaluate(expr.procedure, input, environment)
+    if proc.nil? && expr.procedure.type == "path" && environment.lookup(expr.procedure.steps[0].value)
+      # help the user out here if they simply forgot the leading $
+      raise "T1005"
+    end
+
+    evaluated_args = []
+    evaluated_args.push(applyto.context) if applyto.present?
+
+    # eager evaluation - evaluate the arguments
+    expr.arguments.each do |arg|
+      arg = evaluate(arg, input, environment)
+      if Utils.is_function?(arg)
+        # wrap this in a closure
+        raise "evaluate_function CLOSURE"
+      else
+        evaluated_args.push(arg)
+      end
+    end
+
+    # apply the procedure
+    proc_name = expr.procedure.type == "path" ? expr.procedure.steps[0].value : expr.procedure.value
+    begin
+      if proc.is_a?(JSymbol::Base)
+        proc.token = proc_name
+        proc.position = expr.position
+      end
+      apply(proc, evaluated_args, input, environment)
+    rescue => err
+      raise "evaluate_function error"
+    end
   end
 
   # Evaluate group expression against input data
@@ -381,6 +448,32 @@ class Jsonata
     # pp ["expr:", expr.to_h]
     # pp ["input:", input]
     @fn.lookup(input, expr.value)
+  end
+
+  # Evaluate numeric expression against input data
+  # @param {Object} lhs - LHS value
+  # @param {Object} rhs - RHS value
+  # @param {Object} op - opcode
+  # @returns {*} Result
+  def evaluate_numeric_expression(lhs, rhs, op)
+    return nil if lhs.nil? || rhs.nil?
+    raise "T2001" unless Utils.is_numeric?(lhs)
+    raise "T2002" unless Utils.is_numeric?(rhs)
+
+    case op
+    when "+"
+      lhs + rhs
+    when "-"
+      lhs - rhs
+    when "*"
+      lhs * rhs
+    when "/"
+      result_float = lhs.is_a?(Float) || rhs.is_a?(Float)
+      result = lhs.to_f / rhs.to_f
+      !result_float && result % 1 == 0 ? result.to_i : result
+    when "%"
+      lhs % rhs
+    end
   end
 
   # Evaluate path expression against input data
@@ -588,5 +681,11 @@ class Jsonata
     else
       results.push(input)
     end
+  end
+
+  def setup_static_frame
+    @static_frame = Frame.new
+
+    @static_frame.bind("sum", define_function("sum", '<a<n>:n>'));
   end
 end

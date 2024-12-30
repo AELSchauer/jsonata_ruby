@@ -150,14 +150,14 @@ class Parser
         end
         result.seeking_parent = [lstep.slot] if lstep.type == "parent"
         rest = process_ast(expr.rhs)
-        if rest.type == "function"
+        if rest.type == "function" && rest.procedure.type == "path"
           raise "FUNCTION TODO"
         end
         ## TODO
         # if rest.type == "function" &&
-        #     rest.proedure.type == "path" &&
-        #     rest.proedure.steps.length == 1 &&
-        #     rest.proedure.steps[0].type == "name" &&
+        #     rest.procedure.type == "path" &&
+        #     rest.procedure.steps.length == 1 &&
+        #     rest.procedure.steps[0].type == "name" &&
         #     result.steps.last.type == "function"
         #   # next function in chain of functions - will override a thenable
         #   result.steps[result.steps.length - 1]
@@ -319,7 +319,13 @@ class Parser
         end
       end
     when "function", "partial"
-      raise "process_ast FUNCTION / PARTIAL"
+      result = JSymbol::Base.new(context: self, type: expr.type, name: expr.name, value: expr.value, position: expr.position)
+      result.arguments = expr.arguments.map do |arg|
+        arg_ast = process_ast(arg)
+        push_ancestry(result, arg_ast)
+        arg_ast
+      end
+      result.procedure = process_ast(expr.procedure)
     when "lambda"
       raise "process_ast LAMBDA"
     when "condition"
