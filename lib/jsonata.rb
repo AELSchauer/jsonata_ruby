@@ -686,6 +686,7 @@ class Jsonata
   def setup_static_frame
     @static_frame = Frame.new
 
+    @static_frame.bind("average", define_function("average", "<a<n>:n>"));
     @static_frame.bind("ceil", define_function("ceil", "<n-:n>"));
     @static_frame.bind("count", define_function("count", "<a<n>:n>"));
     @static_frame.bind("floor", define_function("floor", "<n-:n>"));

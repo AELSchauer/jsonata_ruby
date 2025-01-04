@@ -17,6 +17,20 @@ class Functions
     arg1.concat(arg2)
   end
 
+  # Average function
+  # @param {Object} args - Arguments
+  # @returns {number} Average element in the array
+  def average(args)
+    args = args[0]
+    if args.is_a?(Array) && args.count > 0
+      args.sum / args.count
+    elsif args.present?
+      args
+    else
+      nil
+    end
+  end
+
   # Evaluate an input and return a boolean
   # @param {*} arg - Arguments
   # @returns {boolean} Boolean
@@ -76,10 +90,10 @@ class Functions
   # @returns {number} Total value of arguments
   def sum(args)
     args = args[0]
-    if args.is_a?(Numeric)
-      args
-    elsif args.all? { |e| e.is_a?(Numeric) }
+    if args.is_a?(Array)
       args.sum
+    elsif args.present?
+      args
     else
       nil
     end
