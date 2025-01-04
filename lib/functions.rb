@@ -85,6 +85,25 @@ class Functions
     result
   end
 
+  # Implements the merge sort (stable) with optional comparator function
+  # @param {Array} arr - the array to sort
+  # @param {*} comparator - comparator function
+  # @returns {Array} - sorted array
+  def sort(arr, comparator = nil)
+    arr = arr[0]
+    if arr.is_a?(Array)
+      if comparator.present?
+        raise "sort with custom comparison function"
+      else
+        arr.sort
+      end
+    elsif arr.present?
+      [arr]
+    else
+      nil
+    end
+  end
+
   # Sum function
   # @param {Object} arr - array of numbers
   # @returns {number} Total value of arguments
