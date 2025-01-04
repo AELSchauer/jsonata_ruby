@@ -31,6 +31,20 @@ class Functions
     arg[0].nil? ? nil : arg[0].ceil
   end
 
+  # Count function
+  # @param {Object} args - Arguments
+  # @returns {number} Number of elements in the array
+  def count(args)
+    args = args[0]
+    if args.is_a?(Array)
+      args.count
+    elsif args.present?
+      1
+    else
+      0
+    end
+  end
+
   # Rounds a number down
   # @param {Number} arg - Argument
   # @returns {Number} rounded number
