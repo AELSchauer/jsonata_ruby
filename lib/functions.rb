@@ -24,6 +24,13 @@ class Functions
     Utils.is_numeric?(arg) ? !arg.zero? : arg.present?
   end
 
+  # Rounds a number up to integer
+  # @param {Number} arg - Argument
+  # @returns {Number} rounded integer
+  def ceil(arg)
+    arg[0].nil? ? nil : arg[0].ceil
+  end
+
   def lookup(input, key)
     if input.is_a?(Array)
       result = Utils.create_sequence()

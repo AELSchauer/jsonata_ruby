@@ -366,15 +366,15 @@ class Jsonata
 
     # apply the procedure
     proc_name = expr.procedure.type == "path" ? expr.procedure.steps[0].value : expr.procedure.value
-    begin
+    # begin
       if proc.is_a?(JSymbol::Base)
         proc.token = proc_name
         proc.position = expr.position
       end
       apply(proc, evaluated_args, input, environment)
-    rescue => err
-      raise "evaluate_function error"
-    end
+    # rescue => err
+    #   raise "evaluate_function error"
+    # end
   end
 
   # Evaluate group expression against input data
@@ -686,6 +686,7 @@ class Jsonata
   def setup_static_frame
     @static_frame = Frame.new
 
-    @static_frame.bind("sum", define_function("sum", '<a<n>:n>'));
+    @static_frame.bind("sum", define_function("sum", "<a<n>:n>"));
+    @static_frame.bind("ceil", define_function("ceil", "<n-:n>"));
   end
 end
