@@ -61,6 +61,7 @@ class Parser
     symbol("!=") # not equal to
     symbol(">=") # greater than or equal to
     symbol("<=") # less than or equal to
+    symbol("&") # string concatenation
     symbol("and") # Boolean AND
     symbol("or") # Boolean OR
 

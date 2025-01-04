@@ -16,7 +16,7 @@ class Tokenizer
     # "@",
     "*",
     "/",
-    # "&",
+    "&",
     # "#",
     "%",
     # "^",
@@ -216,7 +216,7 @@ class Tokenizer
     end
 
     # test for numbers
-    num_regex = /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?/
+    num_regex = /^(-?)(0|[1-9][0-9]*)(\.[0-9]+)?([Ee][-+]?[0-9]+)?/
     match = num_regex.match(@path[@position..-1])
     if match.present?
       num = match[0].to_f

@@ -104,6 +104,40 @@ class Functions
     end
   end
 
+  # Stringify arguments
+  # @param {Object} arg - Arguments
+  # @param {boolean} [prettify] - Pretty print the result
+  # @returns {String} String from arguments
+  def string(arg, prettify = false)
+    raise "pretty string" if prettify
+
+    return nil if arg.nil?
+    return arg if arg.is_a?(String)
+
+    # functions (built-in and lambda convert to empty string
+    return "" if Utils.is_function?(arg)
+    
+    raise "D3001" if arg.is_a?(Numeric) && !arg.finite?
+
+    arg = arg[0] if arg.is_a?(Array) && Utils.get(arg, :outer_wrapper)
+    jsonify = Proc.new do |val| 
+      if Utils.is_numeric?(val)
+        val.round(15)
+      elsif Utils.is_function?(val)
+        ""
+      else
+        val
+      end
+    end
+    if arg.is_a?(Array)
+      arg.map(&jsonify)
+    elsif arg.is_a?(Hash)
+      arg.transform_values!(&jsonify)
+    end
+
+    prettify ? JSON.pretty_generate(arg) : arg.to_json
+  end
+
   # Sum function
   # @param {Object} arr - array of numbers
   # @returns {number} Total value of arguments

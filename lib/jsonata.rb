@@ -101,7 +101,7 @@ class Jsonata
     when "name"
       evaluate_name(expr, input, environment)
     when "number"
-      expr.value.to_f
+      expr.value
     when "string", "value"
       expr.value
     when "descendant"
@@ -169,7 +169,8 @@ class Jsonata
       when "<", "<=", ">", ">="
         evaluate_comparison_expression(lhs, rhs, op)
       when "&"
-        raise "EVALUATE BINARY -- evaluateStringConcat"
+        evaluate_string_concat(lhs, rhs)
+        # raise "EVALUATE BINARY -- evaluateStringConcat"
       when ".."
         evaluate_range_expression(lhs, rhs)
       when "in"
@@ -236,19 +237,19 @@ class Jsonata
       raise "T2010"
     end
 
-    if lhs.class != rhs.class
+    begin
+      case op
+      when "<"
+        lhs < rhs
+      when "<="
+        lhs <= rhs
+      when ">"
+        lhs > rhs
+      when ">="
+        lhs >= rhs
+      end
+    rescue ArgumentError
       raise "T2009"
-    end
-
-    case op
-    when "<"
-      lhs < rhs
-    when "<="
-      lhs <= rhs
-    when ">"
-      lhs > rhs
-    when ">="
-      lhs >= rhs
     end
   end
 
@@ -610,6 +611,16 @@ class Jsonata
     end
 
     result_sequence
+  end
+
+  # Evaluate string concatenation against input data
+  # @param {Object} lhs - LHS value
+  # @param {Object} rhs - RHS value
+  # @returns {string|*} Concatenated string
+  def evaluate_string_concat(lhs, rhs)
+    lstr = lhs.nil? ? "" : @fn.string(lhs)
+    rstr = rhs.nil? ? "" : @fn.string(rhs)
+    lstr + rstr
   end
 
   # Evaluate unary expression against input data
