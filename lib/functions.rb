@@ -24,11 +24,18 @@ class Functions
     Utils.is_numeric?(arg) ? !arg.zero? : arg.present?
   end
 
-  # Rounds a number up to integer
+  # Rounds a number up
   # @param {Number} arg - Argument
-  # @returns {Number} rounded integer
+  # @returns {Number} rounded number
   def ceil(arg)
     arg[0].nil? ? nil : arg[0].ceil
+  end
+
+  # Rounds a number down
+  # @param {Number} arg - Argument
+  # @returns {Number} rounded number
+  def floor(arg)
+    arg[0].nil? ? nil : arg[0].floor
   end
 
   def lookup(input, key)
