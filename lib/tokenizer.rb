@@ -216,11 +216,12 @@ class Tokenizer
     end
 
     # test for numbers
-    numregex = /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?/
-    match = numregex.match(@path[@position..-1])
+    num_regex = /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?/
+    match = num_regex.match(@path[@position..-1])
     if match.present?
       num = match[0].to_f
       if !num.nan? && num.finite?
+        num = match[3..4].any? ? num : num.to_i
         @position += match[0].length
         return create("number", num)
       else
