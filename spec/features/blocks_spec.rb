@@ -4,7 +4,7 @@ require "json"
 
 # These are test cases copied over from the source JS repo
 describe "Blocks" do
-  xit "case000" do
+  it "case000" do
     # Undefined result
     jsonata, input = build_jsonata(
       expr: "()"

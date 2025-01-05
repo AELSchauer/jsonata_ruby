@@ -23,7 +23,7 @@ class Functions
   def average(args)
     args = args[0]
     if args.is_a?(Array) && args.count > 0
-      args.sum / args.count
+      (args.sum / args.count).round(10)
     elsif args.present?
       args
     else
@@ -122,7 +122,7 @@ class Functions
     arg = arg[0] if arg.is_a?(Array) && Utils.get(arg, :outer_wrapper)
     jsonify = Proc.new do |val| 
       if Utils.is_numeric?(val)
-        val.round(15)
+        val.round(10)
       elsif Utils.is_function?(val)
         ""
       else
@@ -144,7 +144,7 @@ class Functions
   def sum(args)
     args = args[0]
     if args.is_a?(Array)
-      args.sum
+      args.sum.round(10)
     elsif args.present?
       args
     else

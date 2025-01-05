@@ -20,12 +20,12 @@ describe "Function -- Average" do
     )
 
     expect(jsonata.call(input)).to eq([
-      45.285000000000004,
-      122.89500000000001
+      45.285,
+      122.895
     ])
   end
 
-  xit "case002" do
+  it "case002" do
     jsonata, input = build_jsonata(
       expr: "Account.Order.(OrderID & \": \" & $average(Product.(Price*Quantity)))",
       dataset: "dataset5"

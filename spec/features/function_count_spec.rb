@@ -22,9 +22,10 @@ describe "Function -- Count" do
     expect(jsonata.call(input)).to eq([2,2])
   end
 
-  xit "case002" do
+  it "case002" do
     jsonata, input = build_jsonata(
       expr: "Account.Order.(OrderID & \": \" & $count(Product.(Price*Quantity)))",
+      dataset: "dataset5"
     )
 
     expect(jsonata.call(input)).to eq([

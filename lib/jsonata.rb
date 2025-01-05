@@ -490,10 +490,10 @@ class Jsonata
     # expr is an array of steps
     # if the first step is a variable reference ($...), including root reference ($$),
     #   then the path is absolute rather than relative
-    if input.is_a?(Array) && expr.steps.first.type != "variable"
-      input_sequence = input
+    input_sequence = if input.is_a?(Array) && expr.steps.first.type != "variable"
+      input
     else
-      input_sequence = Utils.create_sequence(input)
+      Utils.create_sequence(input)
     end
 
     result_sequence = nil
