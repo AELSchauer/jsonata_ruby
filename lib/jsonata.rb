@@ -701,6 +701,7 @@ class Jsonata
     @static_frame.bind("ceil", define_function("ceil", "<n-:n>"));
     @static_frame.bind("count", define_function("count", "<a<n>:n>"));
     @static_frame.bind("floor", define_function("floor", "<n-:n>"));
+    @static_frame.bind("join", define_function("join", "<a<s>s?:s>"));
     @static_frame.bind("sort", define_function("sort", "<af?:a>"));
     @static_frame.bind("sum", define_function("sum", "<a<n>:n>"));
   end

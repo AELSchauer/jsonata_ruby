@@ -101,7 +101,7 @@ class Signature
 
   def get_symbol(val)
     if val.nil?
-      "n"
+      "m"
     elsif Utils.is_function?(val)
       "f"
     elsif val.is_a?(String)

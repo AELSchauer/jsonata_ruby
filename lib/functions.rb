@@ -66,6 +66,20 @@ class Functions
     arg[0].nil? ? nil : arg[0].floor
   end
 
+  # Join an array of strings
+  # @param {Array} strs - array of string
+  # @param {String} [separator] - the token that splits the string
+  # @returns {String} The concatenated string
+  def join(args)
+    strs = args[0].is_a?(Array) ? args[0] : [args[0]]
+    separator = args[1] || ""
+    strs.nil? ? nil : strs.join(separator)
+  end
+
+  # Return value from an object for a given key
+  # @param {Object} input - Object/Array
+  # @param {String} key - Key in object
+  # @returns {*} Value of key in object
   def lookup(input, key)
     if input.is_a?(Array)
       result = Utils.create_sequence()
